@@ -23,18 +23,22 @@ func main() {
 
 	//Craft packets
 	items := Attack(hll, nBuckets, hash())
+
+	//Add them
 	for _, i := range items {
 		element := hash()
 		element.Write([]byte(i))
 		hll.Add(element)
 	}
 
+	//Result
 	cEnd := hll.Count()
 	fmt.Printf("HLL cardinality approximation after adding the packets: %d.\n", cEnd)
 }
 
-//CreateItems outputs n random strings of length 16 (IP address len)
+//CreateItems outputs n random strings of length 40
 func CreateItems(n int) []string {
+	fmt.Printf("Generating %d random strings...\n", n)
 	var items []string
 	rand.Seed(time.Now().UnixNano())
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -48,12 +52,14 @@ func CreateItems(n int) []string {
 			items = append(items, string(b))
 		}
 	}
+	fmt.Printf("Done.\n")
 	//fmt.Printf("Set of strings: %v\n", items)
 	return items
-	//return []string{"hip", "hip", "hip", "hip", "hop", "hiphop", "test", "stuff", "blabl", "kjhkjh", "kjh"}
 }
 
+//Attack selects packets from items that satisfy the attacker requirements
 func Attack(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string {
+	fmt.Printf("Attacker is selecting the items from the random set...\n")
 	allItems := CreateItems(100000)
 
 	var mask uint32
@@ -71,9 +77,7 @@ func Attack(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string 
 			continue
 		}
 		result := h.Sum32()
-		//		fmt.Printf("Craft: result %d, %b\n", result, result)
 		leadingOne = result & mask
-		//		fmt.Printf("Craft: leadingOne %d\n", leadingOne)
 		if leadingOne != 0 {
 			items = append(items, i)
 		} else {
@@ -81,10 +85,11 @@ func Attack(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string 
 		}
 		h.Reset()
 	}
-	fmt.Printf("Attacker crafted %d items, discarding %d.\n", len(items), discarded)
+	fmt.Printf("Attacker found %d items meeting the requirements, discarding %d.\n", len(items), discarded)
 	return items
 }
 
+//Contains checks if the array a contains x
 func Contains(a []string, x string) bool {
 	for _, n := range a {
 		if x == n {
