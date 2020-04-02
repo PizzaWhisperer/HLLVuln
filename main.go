@@ -38,13 +38,15 @@ func CreateItems(n int) []string {
 	var items []string
 	rand.Seed(time.Now().UnixNano())
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	sLen := 16
+	sLen := 40
 	for i := 0; i < n; i++ {
 		b := make([]rune, sLen)
 		for i := range b {
 			b[i] = letters[rand.Intn(len(letters))]
 		}
-		items = append(items, string(b))
+		if !Contains(items, string(b)) {
+			items = append(items, string(b))
+		}
 	}
 	//fmt.Printf("Set of strings: %v\n", items)
 	return items
@@ -81,4 +83,13 @@ func Attack(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string 
 	}
 	fmt.Printf("Attacker crafted %d items, discarding %d.\n", len(items), discarded)
 	return items
+}
+
+func Contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }
