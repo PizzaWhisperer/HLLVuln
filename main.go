@@ -36,14 +36,14 @@ func main() {
 	fmt.Printf("HLL cardinality approximation after adding the packets: %d.\n", cEnd)
 }
 
-//CreateItems outputs n random strings of length 40
+//CreateItems outputs n random strings of length 5 (52^5 > 380'000'000 possibilities)
 func CreateItems(n int) []string {
 	fmt.Printf("Generating %d random strings...\n", n)
 	var items []string
 	rand.Seed(time.Now().UnixNano())
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	sLen := 40
-	for i := 0; i < n; i++ {
+	sLen := 5
+	for len(items) != n {
 		b := make([]rune, sLen)
 		for i := range b {
 			b[i] = letters[rand.Intn(len(letters))]
@@ -59,8 +59,8 @@ func CreateItems(n int) []string {
 
 //Attack selects packets from items that satisfy the attacker requirements
 func Attack(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string {
-	fmt.Printf("Attacker is selecting the items from the random set...\n")
 	allItems := CreateItems(100000)
+	fmt.Printf("Attacker is selecting the items from the random set...\n")
 
 	var mask uint32
 	mask = 1 << (32 - 8 - 1)
