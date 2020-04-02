@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"hash"
 	"math/rand"
@@ -18,14 +19,39 @@ func main() {
 	hash := murmur3.New32
 	nBuckets := 1 << p
 
+	scenario := flag.String("scenario", "S2", "a string")
+	attackerOnly := flag.Bool("attackerOnly", true, "a bool")
+	flag.Parse()
+
+	var userItems []string
+	var attackerItems []string
+
+	//we initialize with 1000 items from a random user
+	if !*attackerOnly {
+		userItems = CreateItems(1000)
+	}
+
+	//Add honest user's items
+	for _, i := range userItems {
+		element := hash()
+		element.Write([]byte(i))
+		hll.Add(element)
+	}
+
 	cBeg := hll.Count()
 	fmt.Printf("HLL cardinality approximation at start: %d.\n", cBeg)
 
 	//Craft packets
-	items := Attack(hll, nBuckets, hash())
+	switch *scenario {
+	case "S3":
+		attackerItems = AttackS3(hll, nBuckets, hash())
+	default:
 
-	//Add them
-	for _, i := range items {
+		attackerItems = AttackS2(nBuckets, hash())
+	}
+
+	//Add the attacker's items
+	for _, i := range attackerItems {
 		element := hash()
 		element.Write([]byte(i))
 		hll.Add(element)
@@ -57,8 +83,8 @@ func CreateItems(n int) []string {
 	return items
 }
 
-//Attack selects packets from items that satisfy the attacker requirements
-func Attack(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string {
+//Attack under scenario S2
+func AttackS2(nBuckets int, h hash.Hash32) []string {
 	allItems := CreateItems(100000)
 	fmt.Printf("Attacker is selecting the items from the random set...\n")
 
@@ -87,6 +113,11 @@ func Attack(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string 
 	}
 	fmt.Printf("Attacker found %d items meeting the requirements, discarding %d.\n", len(items), discarded)
 	return items
+}
+
+//Attack under S3 scenario
+func AttackS3(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string {
+	return nil
 }
 
 //Contains checks if the array a contains x
