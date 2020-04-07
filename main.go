@@ -145,7 +145,7 @@ func CreateItems(n int) []string {
 
 //Attack under scenario S2
 func AttackS2(nBuckets int, h hash.Hash32) []string {
-	allItems := CreateItems(100000)
+	allItems := CreateItems(250000)
 
 	var mask uint32
 	mask = 1 << (32 - 8 - 1)
@@ -175,7 +175,7 @@ func AttackS2(nBuckets int, h hash.Hash32) []string {
 
 //Attack under S3 scenario
 func AttackS3(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []string {
-	allItems := CreateItems(100000)
+	allItems := CreateItems(250000)
 
 	var mask uint32
 	var exists1bit uint32
