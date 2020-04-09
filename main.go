@@ -20,104 +20,73 @@ func main() {
 	hash := murmur3.New32
 	nBuckets := 1 << p
 
+	//Parse the command line arguments
 	scenario := flag.String("scenario", "S2", "a string")
-	attackerOnly := flag.Bool("attackerOnly", true, "a bool")
-	benchmark := flag.Bool("benchmark", false, "a bool")
+	userData := flag.Bool("userData", true, "a bool")
+	benchmark := flag.Int("benchmark", 1, "an int")
 	flag.Parse()
 
-	if *benchmark {
+	var originalEst uint64
+	var finalEst uint64
+	var itemsPicked int
 
-		var originalEst uint64
-		var finalEst uint64
-		var itemsPicked int
+	for i := 0; i < *benchmark; i++ {
 
-		for i := 0; i < 30; i++ {
-
-			var userItems []string
-			var attackerItems []string
-
-			if !*attackerOnly {
-				userItems = CreateItems(1000)
-			}
-
-			for _, i := range userItems {
-				element := hash()
-				element.Write([]byte(i))
-				hll.Add(element)
-			}
-
-			originalEstTemp := hll.Count()
-
-			switch *scenario {
-			case "S3":
-				attackerItems = AttackS3(hll, nBuckets, hash())
-			default:
-				attackerItems = AttackS2(nBuckets, hash())
-			}
-
-			itemsPickedTemp := len(attackerItems)
-
-			for _, i := range attackerItems {
-				element := hash()
-				element.Write([]byte(i))
-				hll.Add(element)
-			}
-
-			finalEstTemp := hll.Count()
-
-			hll.Clear()
-
-			fmt.Printf("Iteration %d, original card: %d, attacker items: %d, and final card: %d.\n", i, originalEstTemp, itemsPickedTemp, finalEstTemp)
-			originalEst += originalEstTemp
-			itemsPicked += itemsPickedTemp
-			finalEst += finalEstTemp
-		}
-		originalEst = originalEst / 30
-		itemsPicked = itemsPicked / 30
-		finalEst = finalEst / 30
-
-		fmt.Printf("Over 30 iterations, original card: %d, attacker items: %d, and final card: %d.\n", originalEst, itemsPicked, finalEst)
-	} else {
-
+		//we initialize with 1000 items from a random user if flag is set
 		var userItems []string
-		var attackerItems []string
-
-		//we initialize with 1000 items from a random user
-		if !*attackerOnly {
-			fmt.Printf("Generating the honest users items and adding them...\n")
+		if *userData {
 			userItems = CreateItems(1000)
 		}
-
-		//Add honest user's items
 		for _, i := range userItems {
 			element := hash()
 			element.Write([]byte(i))
 			hll.Add(element)
 		}
 
-		cBeg := hll.Count()
-		fmt.Printf("HLL cardinality approximation at start: %d.\n", cBeg)
+		//Initial estimated cardinality
+		originalEstTemp := hll.Count()
+		if *benchmark == 1 {
+			fmt.Printf("HLL cardinality approximation at start: %d.\n", originalEstTemp)
+		}
 
-		//Craft packets
-		fmt.Printf("Generating the attackers random items, picking and adding them...\n")
+		//Craft and add attacker's packets
+		var attackerItems []string
 		switch *scenario {
 		case "S3":
 			attackerItems = AttackS3(hll, nBuckets, hash())
 		default:
 			attackerItems = AttackS2(nBuckets, hash())
 		}
-		fmt.Printf("Attacker found %d items meeting the requirements, discarding %d.\n", len(attackerItems), 100000-len(attackerItems))
-		//Add the attacker's items
+		itemsPickedTemp := len(attackerItems)
 		for _, i := range attackerItems {
 			element := hash()
 			element.Write([]byte(i))
 			hll.Add(element)
 		}
+		if *benchmark == 1 {
+			fmt.Printf("Attacker added %d items, so %d %s of the set.\n", len(attackerItems), len(attackerItems)/2500, "%")
+		}
 
-		//Result
+		//Final estimated cardinality
+		finalEstTemp := hll.Count()
+		if *benchmark == 1 {
+			fmt.Printf("HLL cardinality approximation at the end: %d.\n", finalEstTemp)
+		}
 
-		cEnd := hll.Count()
-		fmt.Printf("HLL cardinality approximation after adding the packets: %d.\n", cEnd)
+		hll.Clear()
+
+		//fmt.Printf("Iteration %d, original card: %d, attacker items: %d, and final card: %d.\n", i, originalEstTemp, itemsPickedTemp, finalEstTemp)
+		originalEst += originalEstTemp
+		itemsPicked += itemsPickedTemp
+		finalEst += finalEstTemp
+	}
+	originalEst = originalEst / uint64(*benchmark)
+	itemsPicked = itemsPicked / *benchmark
+	finalEst = finalEst / uint64(*benchmark)
+
+	if *benchmark != 1 {
+		fmt.Printf("Over %d iterations, original card: %d, attacker items: %d, and final card: %d.\n", *benchmark, originalEst, itemsPicked, finalEst)
+
 	}
 }
 
