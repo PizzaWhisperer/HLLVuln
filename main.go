@@ -49,6 +49,9 @@ func main() {
 			fmt.Printf("HLL cardinality approximation at start: %d.\n", originalEstTemp)
 		}
 
+		regBeg := make([]uint8, 256)
+		copy(regBeg, hll.Reg)
+
 		//Craft and add attacker's packets
 		var attackerItems []string
 		switch *scenario {
@@ -71,6 +74,15 @@ func main() {
 		finalEstTemp := hll.Count()
 		if *benchmark == 1 {
 			fmt.Printf("HLL cardinality approximation at the end: %d.\n", finalEstTemp)
+		}
+
+		//Checks which buckets changed
+		if *benchmark == 1 {
+			for i, reg := range hll.Reg {
+				if regBeg[i] != reg {
+					fmt.Printf("Reg %d, was %v and now is %v\n", i, regBeg[i], reg)
+				}
+			}
 		}
 
 		hll.Clear()
@@ -163,10 +175,13 @@ func AttackS3(hll *hyperloglog.HyperLogLog, nBuckets int, h hash.Hash32) []strin
 		bucket := (result & uint32(((1<<8)-1)<<24)) >> 24
 		ci := hll.Reg[bucket]
 		if ci == 0 {
-			//we can adopt two strategies, or we skip this bucket, i.e., we discard
-			//elements falling into that bucket, or we keeps the one with leading 0s
-			//like in S2. For now we use 2nd strategy.
-			mask = 1 << (32 - 8 - 1)
+			if hll.Count() == 0 {
+				//there is only the attcker's data, we have to increment a bit the counters if we want to add some items
+				mask = 1 << (32 - 8 - 1)
+			} else {
+				//we found an empty bucket amongst filled ones, we do not insert anything
+				mask = 0
+			}
 		} else {
 			mask = GenMask(ci)
 		}
