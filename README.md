@@ -6,8 +6,13 @@ This code demonstrates how an attacker can perform a cardinality manipulation at
 `go build` then `./HLLVuln`
 
 Flag `-scenario` can be set to `"S2"` or `"S3"` to specify the adversarial model.
-Flag `-userData` can be set to `false` to perform the attack on an empty datastructure.
+Flag `-userData` can be set to `X` to add `X` items in the sketch before attacking it.
+Flag `-RT20` can be set to true to perform the attack under the setting of RT20 paper.
+
+As example, running `./HLLVuln -scenario="S2" -userData=1000` will perform the attack under S2 scenario on a sketch that previously observed 1000 items from a honest user.
+
 
 ## Benchmarking
 
-Flag `-benchmark` can be set to any int `X` to loop `X` times and output the statistics.
+Flag `-iterations` can be set to any int `X` to loop `X` times and output the statistics.
+Flag `-log` can be set to true to print more (debug mode).
