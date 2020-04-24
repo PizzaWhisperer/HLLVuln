@@ -3,7 +3,17 @@
 \usepackage{array}
 \usepackage{url}
 \usepackage{hyperref}
-\title{\huge HyperLogLog, exponentially bad in Adversarial Setting}
+
+
+%% TODO NOTES
+
+\usepackage{xcolor}
+\definecolor{oxygenorange}{HTML}{FFDD00}
+\usepackage[color=oxygenorange]{todonotes}
+\newcommand{\mathilde}[2][inline]{\todo[#1]{\textbf{Mathilde:} #2}\xspace}
+\newcommand{\kenny}[2][inline]{\todo[#1]{\textbf{Kenny:} #2}\xspace}
+
+\title{\huge HyperLogLog: Exponentially Bad in Adversarial Settings}
 \author{Mathilde Raynal, Kenneth G. Paterson}
 
 \begin{document}
@@ -12,18 +22,24 @@
 
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-Computing the count of distinct elements in massive data sets is often necessary but memory or computationally expensive. The HyperLogLog (HLL) algorithm \cite{hll2} estimates a data stream’s cardinality while using significantly less memory at the expense of some accuracy. This trade off makes it a really attractive solution that can find its use in a wide range of applications, such as database management or network monitoring. Its recent popularity made it an interesting target for attackers, and vulnerabilities are starting to be acknowledged. This works puts itself in the continuity of \cite{hllvuln} and improves their attack on the HLL accuracy. We show that disclosing too much information about the HLL internals opens the door to estimate manipulation by dishonest users, that may result in an exponential reduction from the true cardinality.
+Computing the count of distinct elements in massive data sets is a common task but naive approaches are memory-expensive. The HyperLogLog (HLL) algorithm (Durand and Flajolet, 2003) estimates a data stream's cardinality while using significantly less memory than a naive approach at the cost of some accuracy. This trade-off makes the HLL algorithm very attractive for a wide range of applications such as database management and network monitoring, where an exact count may not be needed. Recently, the HLL algorithm has started to be proposed for use in scenarios where the inputs may be adversarially generated, for example detection of network scanning attacks. This prompts an examination of the performance of the HLL algorithm in the face of adversarial inputs. We show that in such a setting, the HLL algorithm's estimate of cardinality can be exponentially bad: when an adversary has access to the internals of the HLL algorithm, an adversary who has some flexibility in choosing what inputs will be recorded can manipulate the cardinality estimate to be exponentially smaller than the true cardinality. 
 \end{abstract}
 }
 
 \IEEEdisplaynontitleabstractindextext
 
 \section{Introduction}
-Obvious approaches to computing the cardinality of a big data set, such as sorting the elements or simply maintaining the set of unique elements seen, are impractical. HyperLogLog is the most widely used cardinality estimator nowadays, and the first reviews of its capabilities show a lack of security both in privacy and correctness. We move forward in exploiting the vulnerabilities of the sketch and show that an attacker can easily manipulate the HLL estimate with very small knowledge about the sketch and a limited number of computations.\\
+Naive approaches to computing the cardinality of a big data set, such as sorting the elements or simply maintaining the set of unique elements seen, are impractical at scale. The HyperLogLog algorithm (HLL henceforth)~\cite{HLL } is today the most widely used cardinality estimator. It is increasingly used in settings where adversaries may have  incentives to manipulate the estimate made by the algorithm. For example,~\cite{} proposes its use for detecting network scanning attacks, while Facebook engineers have reported~\cite{} that they use HLL for estimating the number of active users. These applications demand a careful evaluation of the performance of HLL under adversarial input. 
 
-The rest of the paper is organized as follows. Section 2 gives an overview of the HyperLogLog algorithm. Section 3 presents our attack and evaluates its impact under different adversarial models. Section 4 provides a conclusion and some ideas for future work.
+Very recently, Reviriego and Ting~\cite{hllvuln} initiated work in this direction, showing that in specific attack settings, the cardinality estimate made by HLL could be modified through input selection. In this paper, we present a complete analysis of HLL in adversarial setting, considering more realistic attack scenarios and giving more powerful attacks than~\cite{hllvuln}. In particular, we show that with only modest knowledge of the HLL internals and a moderate amount of computation, an adversary can make HLL underestimate true cardinality by a factor this is exponential in the number of buckets used by the algorithm.
 
-\section{HyperLogLog}
+\kenny{M: Please fill in missing references above.}
+
+The rest of the paper is organized as follows. Section~\ref{sec:overview} gives an overview of the HyperLogLog algorithm. Section~\ref{sec:attacks} presents our different adversarial models. There, we also give attacks and evaluate their impacts under the different adversarial models. Section~\ref{sec:conclusions} provides our conclusions and some ideas for future work.
+
+
+ 
+\section{HyperLogLog}\label{sec:overview}
 \subsection{Algorithm}
 HLL is a streaming algorithm based on the bit pattern observation that for a stream of randomly distributed numbers, if we observe a number $x$ with the maximum of $k$ leading 0 bits, the cardinality of the stream is likely to be 2$^{k+1}$. In practice, to guaranty uniform distribution of the inputs, they go through a hash function $h$ before being processed. This simple approach has the disadvantage of a large variance. In order to improve the estimate, we can use many estimators (buckets) instead of one and average the results. To map a value $h(x)$ to a bucket, \cite{loglog} suggests using the first few $n$ bits of $h(x)$ as an index, and then compute the longest sequence of leading 0s on the $l = len(h(x)) - n $ bits left. Estimators from all buckets are averaged with an harmonic mean and scaled by a constant $\alpha$, empirically computed to correct a systematic multiplicative bias. As result, the HyperLogLog algorithm is able to estimate cardinalities greater than $10^9$ with a typical standard error of 2\%, using 1.5 kB of memory.
 
@@ -44,7 +60,7 @@ The work of \cite{cardestprivacy} breaks the privacy of the HLL sketch and concl
 
 Both propose mitigations using a salted sketch, either as replacement, but at the cost of loosing mergeability, or in addition to an unsalted sketch, inducing a memory overhead. This might not be a convenient solution for some applications, they thus encourage further research. 
 
-\section{Vulnerabilities}
+\section{Vulnerabilities}\label{sec:attacks}
 This section presents different adversarial settings and the corresponding attacks to manipulate the HLL estimate. The attacker's goal in our work is to bring the estimate down, as this would cause the most damage when looking at the applications of HLL. One can think about the attacker trying the hide from a detection system. Conveniently, it is easy to adopt the same strategy as the one we present for an attacker who is looking to artificially inflate the HLL estimate given a limited data set input. The impact over the cardinality estimate and the computational effort to be done by the attacker is analyzed afterwards. 
 
 \subsection{Adversarial setting}
@@ -118,8 +134,8 @@ To assess the efficiency of our attacks, we can confront our results from Tab. \
 \label{table:tab2}
 \end{table}
 
-\section{Conclusion}
-The HyperLogLog algorithm is a elegant and efficient solution to the distinct count problem. Its simple structure makes it easy to code and use, as shows the growing number of available open-source implementations. Nonetheless, disclosing such low level details can be exploited by malicious users to manipulate the estimate of the sketch and break the system that is built on top. Our attack is trivial but powerful and should raise awareness on the security of HLL, such that product designers understand the risks they may encounter when exposed to an adversarial setting. Future work could consist in finding mitigations that do not rely on salt. For example, would the imposed ID setting (like Facebook) solve the issue but still be convenient for the various HLL applications? Also left for future work is to formalize the extension of our attack to the HLL variants, i.e., to show that it also breaks the HLL++ \cite{hllpratice} and sliding HLL \cite{slidinghll} algorithms.
+\section{Conclusion}\label{sec:conclusions}
+The HyperLogLog algorithm is an elegant and efficient solution to the distinct count problem. Its simple structure makes it easy to code and use, as shows the growing number of available open-source implementations. Nonetheless, disclosing such low level details can be exploited by malicious users to manipulate the estimate of the sketch and break the system that is built on top. Our attack is trivial but powerful and should raise awareness on the security of HLL, such that product designers understand the risks they may encounter when exposed to an adversarial setting. Future work could consist in finding mitigations that do not rely on salt. For example, would the imposed ID setting (like Facebook) solve the issue but still be convenient for the various HLL applications? Also left for future work is to formalize the extension of our attack to the HLL variants, i.e., to show that it also breaks the HLL++ \cite{hllpratice} and sliding HLL \cite{slidinghll} algorithms.
 
 \bibliographystyle{ieeetr}
 \bibliography{ref.bib}
