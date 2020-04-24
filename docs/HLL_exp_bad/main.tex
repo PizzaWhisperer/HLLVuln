@@ -58,7 +58,7 @@ Regardless of the sensitivity of the above examples, none of the relevant papers
 
 \subsection{Related Work}
 
-The work of~\cite{cardestprivacy} breaks the privacy of the HLL sketch and concludes that having the ability to test the insertion \kenny{what does this mean?} of a targeted item gives information about whether the item was originally present in the input data set. It is argued in~\cite{cardestprivacy} that HLL can be used by organizations to store and process location data, which is inherently sensitive, so losing privacy would leak users' locations and potentially cause great harm. 
+The work of~\cite{cardestprivacy} breaks the privacy of the HLL sketch and concludes that having the ability to test the insertion \kenny{what does this mean? see other comment later; the more I think about it, the more I think their paper is junk.} of a targeted item gives information about whether the item was originally present in the input data set. It is argued in~\cite{cardestprivacy} that HLL can be used by organizations to store and process location data, which is inherently sensitive, so losing privacy would leak users' locations and potentially cause great harm. 
 
 In~\cite{hllvuln}, Reviriego and Ting exploit a vulnerability of HLL to manipulate the cardinality estimate, leading to a five-fold reduction in the estimate compared to the true cardinality.
 
@@ -80,7 +80,7 @@ We model three distinct adversarial scenarios based on the adversary's knowledge
 \item[S3:] the adversary has direct access to the sketch in use and all its internals, i.e., the number of buckets, the hash function $h$, and also the contents of each bucket in the HLL. Recall that these buckets hold the intermediate estimators that are averaged in a later step to compute the final cardinality estimate.
 \end{itemize}
 
-Scenarios S1 and S2 are presented as M2 and M1, respectively, in~\cite{hllvuln}. We do not put our focus on S1 as this previous work in~\cite{hllvuln} fully exploits this scenario. Their attack works as follow: ``after each insertion the cardinality is checked and the items which do not increment the HLL estimate are retained''. It is unclear what this means in practice, since after insertion into the HLL, an item cannot usually be removed by the adversary. \kenny{Matilda, can you think about this sentence that I added? Do we need to rewrite S1? The scenario does not really make sense at all in practice. I think we might use this to beat up the other paper a bit more.}
+Scenarios S1 and S2 are presented as M2 and M1, respectively, in~\cite{hllvuln}. We do not put our focus on S1 as this previous work in~\cite{hllvuln} fully exploits this scenario. Their attack works as follow: ``after each insertion the cardinality is checked and the items which do not increment the HLL estimate are retained''. It is unclear what this means in practice, since after insertion into the HLL, an item cannot usually be removed by the adversary. \kenny{Mathilde: can you think about this sentence that I added? Do we need to rewrite S1? The scenario does not really make sense at all in practice. I think we might use this to beat up the other paper a bit more.}
 
 We start by presenting our attack in scenario S2, providing much stronger results than the corresponding attack of \cite{hllvuln}, and then use the additional information the adversary has access to in scenario S3 to make the attack even more powerful. 
 
