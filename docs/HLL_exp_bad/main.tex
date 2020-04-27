@@ -3,15 +3,15 @@
 \usepackage{array}
 \usepackage{url}
 \usepackage{hyperref}
-
+\usepackage{xspace}
 
 %% TODO NOTES
 
 \usepackage{xcolor}
 \definecolor{oxygenorange}{HTML}{FFDD00}
 \usepackage[color=oxygenorange]{todonotes}
-\newcommand{\mathilde}[2][inline]{\todo[#1]{\textbf{Mathilde:} #2}\xspace}
-\newcommand{\kenny}[2][inline]{\todo[#1]{\textbf{Kenny:} #2}\xspace}
+\newcommand{\mathilde}[1]{\todo[inline]{\textbf{Mathilde:} #1}\xspace}
+\newcommand{\kenny}[1]{\todo[inline]{\textbf{Kenny:} #1}\xspace}
 
 \title{HyperLogLog: Exponentially Bad in Adversarial Settings}
 \author{Mathilde Raynal, Kenneth G. Paterson}
