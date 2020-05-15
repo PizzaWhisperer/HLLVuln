@@ -155,6 +155,7 @@ Secondly, when attacking an empty HLL sketch in S2, the final cardinality estima
 We can also compare our results from Table~\ref{table:tab2} with results from the attack presented in Section 5.1 of~\cite{hllvuln}. In that paper, the authors target the Redis~\cite{redis} open-source implementation of HLL and perform the attack against an empty sketch. Given a set of 250,000 items, the adversary could choose ``74,390 distinct items and obtain an HLL estimate of only 15,780''~\cite{hllvuln}, achieving a five-fold reduction from the true cardinality. The authors present this attack as being in their M2 (our S1) scenario, without providing a detailed explanation. By looking at the Redis open-source code, we were able to obtain full details of the implementation that any attacker could obtain, and thus argue that based on this knowledge, the adversarial scenario is actually M1 (S2 in this work). This makes the comparison between the results of~\cite{hllvuln} and our S2 results appropriate. The S2 adversary following our strategy is able to add 125,000 distinct items while keeping the cardinality estimate at 367. Compared to~\cite{hllvuln}, we can insert twice as many items and reduce the cardinality estimate by a factor of 340 instead of 5.
 
 \begin{table}[h]
+\centering
 \caption{Attack results, averaged over 30 iterations.}
 \begin{tabular}{| m{8.5em} | m{4em} | m{4em} | m{4em} | m{4em} |}
     \hline
@@ -168,6 +169,7 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 \end{table}
 
 \begin{table}[h]
+\centering
 \caption{Attack results, averaged over 30 iterations, in the setting of \cite{hllvuln}.}
 \begin{tabular}{| m{8.5em} | m{4em} | m{4em} | m{4em} | m{4em} |}
     \hline
