@@ -75,8 +75,10 @@ func (h *HyperLogLog) Count() uint64 {
 	est := calculateEstimate(h.Reg)
 	if est <= float64(h.m)*2.5 {
 		if v := countZeros(h.Reg); v != 0 {
+			//println("Using LC correction")
 			return uint64(linearCounting(h.m, v))
 		}
+		//println("v == 0")
 		return uint64(est)
 	} else if est < two32/30 {
 		return uint64(est)
