@@ -45,9 +45,45 @@ The rest of the paper is organised as follows. Section~\ref{sec:overview} gives 
 \subsection{The Algorithm}
 HLL~\cite{hll} is a streaming algorithm based on the key observation that, for a stream of randomly distributed values represented as bit-strings of some fixed length, if we observe a value with the maximum of $k$ leading zero-bits, then the cardinality of the stream (i.e.\ the number of distinct values it contains) is likely to be on the order of $2^{k+1}$. In practice, to ensure a uniform distribution, the stream values are first processed by a hash function $h$ before the leading bits are inspected. So to estimate the cardinality of a stream, we need only store a representation of $k$, the length of the largest observed string of leading zero-bits for numbers in the stream. This provides a very compact mechanism for estimating the stream cardinality -- if the true cardinality is $N$, then just $\log\log(N)$ bits are needed to store the estimate.
 
-This simple approach suffers from large variance in the estimation. In order to improve the estimate, we can use many estimators in parallel instead of one, and average the results. Each estimate is stored in its own bucket. The collection of buckets is referred to as the HLL \emph{sketch}. To map a value $x$ to one of $2^n$ buckets, \cite{loglog} suggests using the first $n$ bits of $h(x)$ as a bucket index, and then computing the longest sequence of leading zero bits on the remaining $\ell$ bits of $h(x)$ (so that the output length of $h(\cdot)$ is $n+\ell$). Estimators from all buckets are averaged using the harmonic mean and scaled by a constant $\alpha$, where $\alpha$ is empirically computed to correct a systematic multiplicative bias. As result, HLL is able to estimate cardinalities greater than $10^9$ with a typical standard error of 2\%, using only 1.5 kB of memory~\cite{hll}.
+This simple approach suffers from large variance in the estimation. In order to improve the estimate, we can use many estimators in parallel instead of one, and average the results. Each estimate is stored in its own bucket. The collection of buckets is referred to as the HLL \emph{sketch}. To map a value $x$ to one of $2^n$ buckets, \cite{loglog} suggests using the first $n$ bits of $h(x)$ as a bucket index, and then computing the longest sequence of leading zero bits on the remaining $\ell$ bits of $h(x)$ (so that the output length of $h(\cdot)$ is $n+\ell$). Estimators from all buckets are averaged using the harmonic mean and scaled by a constant $\alpha$, where $\alpha$ is empirically computed to correct a systematic multiplicative bias. On top of that, correction for small and big range are applied as shown in \ref{fig:hll}. As result, HLL is able to estimate cardinalities greater than $10^9$ with a typical standard error of 2\%, using only 1.5 kB of memory~\cite{hll}.
 
 An interesting property of HLL is that it supports merging in a lossless way. To combine two buckets at index $i$ in two different HLL instances, take the maximum of the two bucket entries and assign that to the matching bucket $i$ in the merged HLL sketch. Such a simple set union operation allows easy parallelisation of operations among multiple machines independently, provided they use the same hash function and the same number of buckets.
+
+\begin{figure}[h]
+\centering
+\fbox{
+\begin{minipage}{40em}
+\begin{flushleft}
+\textit{Let $h : D \rightarrow \{0, 1\}^{32}$ hash data from $\mathcal{D}$ to binary $32$–bit words.\\
+Let $\rho(s)$ be the position of the leftmost $1$-bit of $s$: e.g., $\rho(1...) = 1, \rho(0001...) = 4, \rho(0^K) = K + 1.$\\}
+\textbf{define} $\alpha_{16} = 0.673$; $\alpha_{32} = 0.697$; $\alpha_{64} = 0.709$; $\alpha_{m} = 0.7213/(1+ 1.079/m)$ for $m \ge 128$;\\
+\vspace{0.5em}
+\textbf{Program} HyperLogLog (\textbf{input} $\mathcal{M}$ : multiset of items from domain $\mathcal{D}$).\\
+\textbf{assume} $m = 2^b$ with $b \in [4..16].$\\
+\textbf{initialize} a collection of $m$ registers, $M[1], ..., M[m]$, to $0$;\\
+\vspace{0.5em}
+\textbf{for} $v \in \mathcal{M}$ \textbf{do}\\
+    \hspace{2em} \textbf{set} $x := h(v);$\\
+    \hspace{2em} \textbf{set} $j = 1 + <x_1x_2...x_{b}>_2$; \hfill \textit{\{the binary address determined by the first $b$ bits of $x$\}}\\
+    \hspace{2em} \textbf{set} $w := x_{b+1}x_{b+2}...$;\\
+   \hspace{2em} \textbf{set} $M[j] :=$ max$(M[j], \rho(w))$;\\
+\vspace{0.2em}
+\textbf{compute} $E := \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}$; \hfill \textit{\{the “raw” HyperLogLog estimate\}}\\
+\vspace{0.2em}
+\textbf{if} $E \le \frac{5}{2}m$ \textbf{then}\\
+    \hspace{2em}  \textbf{let} $V$ be the number of registers equal to $0$;\\
+    \hspace{2em}  \textbf{if} $V \neq 0$ \textbf{then set} $E^*:= m $log$(m/V)$ \textbf{else set} $E^*:= E$; \hfill \textit{\{small range correction\}}\\
+\textbf{if} $E \le \frac{1}{30}2^{32}$ \textbf{then}\\
+    \hspace{2em} \textbf{set} $E^*:= E$; \hfill \textit{\{intermediate range—no correction\}}\\
+\textbf{if} $E > \frac{1}{30}2^{32}$ \textbf{then}\\
+    \hspace{2em}  \textbf{set} $E^*:= -2^{32}$log$(1 - E/2^{32})$; \hfill \textit{\{large range correction\}}\\
+\textbf{return} \textit{cardinality estimate $E^*$ with typical relative error} $\pm1.04/\sqrt{m}$.
+\end{flushleft}
+\end{minipage}
+}
+\caption{The HyperLogLog Program}
+\label{fig:hll}
+\end{figure}
 
 \subsection{Applications}
 For completeness and motivation, we provide examples of concrete uses of HLL:
@@ -88,7 +124,7 @@ We model four distinct adversarial scenarios based on the adversary's knowledge 
 
 Scenarios S1 and S2 are presented as M2 and M1, respectively, in~\cite{hllvuln}. S3 is the \textit{external} attack scenario in~\cite{cardestprivacy}. S4 is a slightly weaker version of the \textit{insider} attack scenario in~\cite{cardestprivacy}, the difference being that an insider adversary in~\cite{cardestprivacy} has continuous access to the HLL sketch internals including all bucket values, while our adversary in S4 only has access to a snapshot of the HLL sketch internals at the start of its attack.
 
-We start by highlighting the fact that S1 seems unrealistic in practice. In a networking application, the authors of~\cite{hllvuln} argue that the assumptions of S1 could be fulfilled if the attacker learns which machine is used to do the monitoring, buys the same device, and uses it as the shadow device. It is possible that the provider uses a different HLL salt or key per device. This would make any pre-computation with the shadow device irrelevant and considerably weaken the attack presented in Section 3.2 of \cite{hllvuln}. If, on the other hand, we assume that the devices are perfect copies of one another, then we show that it is actually possible for the attacker to predict the behaviour of the HLL sketch as elements are inserted into it, and effectively elevate itself to being an S2 adversary, without actually knowing the hash function $h$ in use. In detail, the attacker can recover some bits of interest in the hash values of targeted items, and infer the knowledge given to the adversary under S2. To do so, the attacker can insert the item $x$ on an empty sketch and ask for the resulting cardinality, denoted $c$. Note that inserting $x$ only touches one bucket of the HLL sketch; let that bucket have index $i$ (which is unknown to the attacker) and value $c_i$ after the insertion.  From the formula used to compute the HLL sketch cardinality estimate $c$, we get the equation: 
+We start by highlighting the fact that S1 seems unrealistic in practice. In a networking application, the authors of~\cite{hllvuln} argue that the assumptions of S1 could be fulfilled if the attacker learns which machine is used to do the monitoring, buys the same device, and uses it as the shadow device. It is possible that the provider uses a different HLL salt or key per device. This would make any pre-computation with the shadow device irrelevant and considerably weaken the attack presented in Section 3.2 of \cite{hllvuln}. If, on the other hand, we assume that the devices are perfect copies of one another, then we show that it is actually possible for the attacker to predict the behaviour of the HLL sketch as elements are inserted into it, and effectively elevate itself to being an S2 adversary, without actually knowing the hash function $h$ in use. In detail, the attacker can recover some bits of interest in the hash values of targeted items, and infer the knowledge given to the adversary under S2. To do so, the attacker can insert the item $x$ on an empty sketch and ask for the resulting cardinality, denoted $c$. Note that inserting $x$ only touches one bucket of the HLL sketch; let that bucket have index $i$ (which is unknown to the attacker) and value $c_i$ after the insertion.  From the formula used to compute the HLL sketch cardinality estimate $c$, we get the equation:
 \begin{eqnarray*}
    \log_2(c)-\log_2(\alpha 2^{2n} - c2^n + c) &=& c_i
 \end{eqnarray*}
@@ -187,7 +223,7 @@ The HyperLogLog algorithm is an elegant and efficient solution to the problem of
 
 A formal analysis of using salting as a countermeasure to our attacks remains open.
 %Future work could consist in finding mitigations that do not rely on salt. For example, would the imposed ID setting (like Facebook) solve the issue but still be convenient for the various HLL applications?
-Also left for future work is the task of extending our attacks to HLL variants such as HLL++~\cite{hllpratice} and sliding HLL~\cite{slidinghll}.
+Also left for future work is the task of extending our attacks to HLL variants such as redis alternative using maximum likelihood~\cite{newhll}, HLL++~\cite{hllpratice} and sliding HLL~\cite{slidinghll}.
 
 \bibliographystyle{ieeetr}
 \bibliography{ref.bib}
