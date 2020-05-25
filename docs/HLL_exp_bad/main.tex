@@ -45,11 +45,11 @@ The rest of the paper is organised as follows. Section~\ref{sec:overview} gives 
 \subsection{The Algorithm}
 HLL~\cite{hll} is a streaming algorithm based on the key observation that, for a stream of randomly distributed values represented as bit-strings of some fixed length, if we observe a value with the maximum of $k$ leading zero-bits, then the cardinality of the stream (i.e.\ the number of distinct values it contains) is likely to be on the order of $2^{k+1}$. In practice, to ensure a uniform distribution, the stream values are first processed by a hash function $h$ before the leading bits are inspected. So to estimate the cardinality of a stream, we need only store a representation of $k$, the length of the largest observed string of leading zero-bits for numbers in the stream. This provides a very compact mechanism for estimating the stream cardinality -- if the true cardinality is $N$, then just $\log\log(N)$ bits are needed to store the estimate.
 
-This simple approach suffers from large variance in the estimation. In order to improve the estimate, we can use many estimators in parallel instead of one, and average the results. Each estimate is stored in its own bucket. The collection of buckets is referred to as the HLL \emph{sketch}. To map a value $x$ to one of $2^n$ buckets, \cite{loglog} suggests using the first $n$ bits of $h(x)$ as a bucket index, and then computing the longest sequence of leading zero bits on the remaining $\ell$ bits of $h(x)$ (so that the output length of $h(\cdot)$ is $n+\ell$). Estimators from all buckets are averaged using the harmonic mean and scaled by a constant $\alpha$, where $\alpha$ is empirically computed to correct a systematic multiplicative bias. On top of that, correction for small and big range are applied as shown in \ref{fig:hll}. As result, HLL is able to estimate cardinalities greater than $10^9$ with a typical standard error of 2\%, using only 1.5 kB of memory~\cite{hll}.
+This simple approach suffers from large variance in the estimation. In order to improve the estimate, we can use many estimators in parallel instead of one, and average the results. Each estimate is stored in its own bucket. The collection of buckets is referred to as the HLL \emph{sketch}. To map a value $x$ to one of $2^n$ buckets, \cite{loglog} suggests using the first $n$ bits of $h(x)$ as a bucket index, and then computing the longest sequence of leading zero bits on the remaining $\ell$ bits of $h(x)$ (so that the output length of $h(\cdot)$ is $n+\ell$). Estimators from all buckets are averaged using the harmonic mean and scaled by a constant $\alpha$, where $\alpha$ is empirically computed to correct a systematic multiplicative bias. Small and big cardinalities are handled differently to correct eventual distortions, as shown in Fig. \ref{fig:hll}. When the estimate is comparatively small with respect to $2^n$, the Hit Counting algorithm of Whang et al.~\cite{hitcounting} which looks at the number of empty bins is used to provide the estimator. A similar correction is applied for large cardinalities in order to take into account the likelihood of hashing collisions. As result, HLL is able to estimate cardinalities greater than $10^9$ with a typical standard error of 2\%, using only 1.5 kB of memory~\cite{hll}.
 
 An interesting property of HLL is that it supports merging in a lossless way. To combine two buckets at index $i$ in two different HLL instances, take the maximum of the two bucket entries and assign that to the matching bucket $i$ in the merged HLL sketch. Such a simple set union operation allows easy parallelisation of operations among multiple machines independently, provided they use the same hash function and the same number of buckets.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \fbox{
 \begin{minipage}{40em}
@@ -59,13 +59,13 @@ Let $\rho(s)$ be the position of the leftmost $1$-bit of $s$: e.g., $\rho(1...) 
 \textbf{define} $\alpha_{16} = 0.673$; $\alpha_{32} = 0.697$; $\alpha_{64} = 0.709$; $\alpha_{m} = 0.7213/(1+ 1.079/m)$ for $m \ge 128$;\\
 \vspace{0.5em}
 \textbf{Program} HyperLogLog (\textbf{input} $\mathcal{M}$ : multiset of items from domain $\mathcal{D}$).\\
-\textbf{assume} $m = 2^b$ with $b \in [4..16].$\\
+\textbf{assume} $m = 2^n$ with $n \in [4..16].$\\
 \textbf{initialize} a collection of $m$ registers, $M[1], ..., M[m]$, to $0$;\\
 \vspace{0.5em}
 \textbf{for} $v \in \mathcal{M}$ \textbf{do}\\
     \hspace{2em} \textbf{set} $x := h(v);$\\
-    \hspace{2em} \textbf{set} $j = 1 + <x_1x_2...x_{b}>_2$; \hfill \textit{\{the binary address determined by the first $b$ bits of $x$\}}\\
-    \hspace{2em} \textbf{set} $w := x_{b+1}x_{b+2}...$;\\
+    \hspace{2em} \textbf{set} $j = 1 + <x_1x_2...x_{n}>_2$; \hfill \textit{\{the binary address determined by the first $b$ bits of $x$\}}\\
+    \hspace{2em} \textbf{set} $w := x_{n+1}x_{n+2}...$;\\
    \hspace{2em} \textbf{set} $M[j] :=$ max$(M[j], \rho(w))$;\\
 \vspace{0.2em}
 \textbf{compute} $E := \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}$; \hfill \textit{\{the “raw” HyperLogLog estimate\}}\\
