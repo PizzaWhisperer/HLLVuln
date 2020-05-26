@@ -9,6 +9,7 @@ import (
 	"./clarkduvall/hyperloglog"
 )
 
+//==================utils==================
 //CreateItems outputs n random strings of length 4 (52^4 > 7'000'000 possibilities)
 func CreateItems(n int) []string {
 	itemsMap := make(map[string]bool)
@@ -66,50 +67,13 @@ func GenMask(ci uint8) uint32 {
 	return mask
 }
 
-//Create batch picks elements such that the estimated cardinality is > 2.5*nBuckets
-func CreateBatch(nBuckets int, items []string, h hash.Hash32) ([]string, uint64) {
-	hll := EmptyHLL()
-
-	var batch []string
-	for _, i := range items {
-		batch = append(batch, i)
-		h.Write([]byte(i))
-		hll.Add(h)
-		h.Reset()
-		if float64(hll.Count()) > float64(nBuckets)*2.5 {
-			return batch, hll.Count()
-		}
-	}
-	return nil, 0
-}
-
-//CheckItem looks if the ith item satisfy the attack requirements
-func CheckItem(index int, batch []string, count uint64, nBuckets int, h hash.Hash32) bool {
-	hll := EmptyHLL()
-
-	rest := make([]string, len(batch))
-
-	copy(rest, batch)
-	rest[index] = rest[len(rest)-1]
-	rest = rest[:len(rest)-1]
-	for _, i := range rest {
-		h.Write([]byte(i))
-		hll.Add(h)
-		h.Reset()
-	}
-	// println("prev")
-	prev := hll.Count()
-	// println("now")
-	// hll.Count()
-	return prev == count
-}
-
 //EmptyHLL returns an emtpy HLL, it is used to simulate the reset function
 func EmptyHLL() *hyperloglog.HyperLogLog {
 	hll, _ := hyperloglog.New(p)
 	return hll
 }
 
+//Removes items of rm from items
 func RMItems(items []string, rm []string) []string {
 	rmMap := make(map[string]struct{}, len(rm))
 	for _, x := range rm {
@@ -124,6 +88,7 @@ func RMItems(items []string, rm []string) []string {
 	return result
 }
 
+//Map2List takes a map and returns the keys as list
 func Map2List(x map[string]bool) []string {
 	var list []string
 	for s, _ := range x {
@@ -132,6 +97,9 @@ func Map2List(x map[string]bool) []string {
 	return list
 }
 
+//==================S1==================
+
+//Adds MLogM + M items. Second step is to make the set smaller (cardinality and size wise) but to still fill the registers
 func FillRegisters(nBuckets int, items []string, h hash.Hash32) *hyperloglog.HyperLogLog {
 	hll := EmptyHLL()
 
@@ -159,57 +127,57 @@ func FillRegisters(nBuckets int, items []string, h hash.Hash32) *hyperloglog.Hyp
 			}
 		}
 	}
-	//2nd Step: make that set as small as possible (technically, need M items)
-	smallSetLoop := true
-	var newBatch []string
-	newBatch = batch
-	prevCount := hll.Count()
-	//fmt.Printf("At the begining : count %d, items %d\n", hll.Count(), len(newBatch))
-
-	for smallSetLoop {
-		var tempBatch []string
-		tempBatch = newBatch
-		for _, item := range newBatch {
-			hll = EmptyHLL()
-			//try without i
-			rest := RMItems(newBatch, []string{item})
-			for _, r := range rest {
-				h.Write([]byte(r))
-				hll.Add(h)
-				h.Reset()
-			}
-			if prevCount == hll.Count() {
-				tempBatch = RMItems(tempBatch, []string{item})
-				break
-			}
-		}
-		newBatch = tempBatch
-		prevCount = hll.Count()
-		//fmt.Printf("At the middle : count %d, items %d, 0 regs %d\n", hll.Count(), len(newBatch), countZeros(hll.Reg))
-		stopL := nBuckets
-		if len(newBatch) <= stopL {
-			if countZeros(hll.Reg) != 0 {
-				//fmt.Printf("WE FAILED AT 2nd step COUNT %d and %d non 0 reg\n", hll.Count(), countZeros(hll.Reg))
-			} else {
-				//fmt.Println("YAS 2nd step")
-				smallSetLoop = false
-				break
-			}
-		}
-	}
-	//Final HLL
-	hll = EmptyHLL()
-
-	for _, r := range newBatch {
-		h.Write([]byte(r))
-		hll.Add(h)
-		h.Reset()
-	}
+	// //2nd Step: make that set as small as possible (technically, need M items)
+	// smallSetLoop := true
+	// var newBatch []string
+	// newBatch = batch
+	// prevCount := hll.Count()
+	// //fmt.Printf("At the begining : count %d, items %d\n", hll.Count(), len(newBatch))
+	//
+	// for smallSetLoop {
+	// 	var tempBatch []string
+	// 	tempBatch = newBatch
+	// 	for _, item := range newBatch {
+	// 		hll = EmptyHLL()
+	// 		//try without i
+	// 		rest := RMItems(newBatch, []string{item})
+	// 		for _, r := range rest {
+	// 			h.Write([]byte(r))
+	// 			hll.Add(h)
+	// 			h.Reset()
+	// 		}
+	// 		if prevCount == hll.Count() {
+	// 			tempBatch = RMItems(tempBatch, []string{item})
+	// 			break
+	// 		}
+	// 	}
+	// 	newBatch = tempBatch
+	// 	prevCount = hll.Count()
+	// 	//fmt.Printf("At the middle : count %d, items %d, 0 regs %d\n", hll.Count(), len(newBatch), countZeros(hll.Reg))
+	// 	stopL := nBuckets
+	// 	if len(newBatch) <= stopL {
+	// 		if countZeros(hll.Reg) != 0 {
+	// 			//fmt.Printf("WE FAILED AT 2nd step COUNT %d and %d non 0 reg\n", hll.Count(), countZeros(hll.Reg))
+	// 		} else {
+	// 			//fmt.Println("YAS 2nd step")
+	// 			smallSetLoop = false
+	// 			break
+	// 		}
+	// 	}
+	// }
+	// //Final HLL
+	// hll = EmptyHLL()
+	//
+	// for _, r := range newBatch {
+	// 	h.Write([]byte(r))
+	// 	hll.Add(h)
+	// 	h.Reset()
+	// }
 	//fmt.Printf("HLL with count %d, items %d, 0-reg %d\n", hll.Count(), len(newBatch), countZeros(hll.Reg))
 	return hll
 }
 
-//return true if item is bad
+//CheckBadItem inserts item on a copy of the HLL and return true if item increases the cardinality
 func CheckBadItem(item string, nBuckets int, h hash.Hash32, hllOrig *hyperloglog.HyperLogLog) bool {
 	//work on new struct
 	hll, _ := hyperloglog.New(p)
@@ -231,4 +199,32 @@ func countZeros(s []uint8) uint32 {
 		}
 	}
 	return c
+}
+
+//Adds 3M items
+func FillSketch(nBuckets int, items []string, h hash.Hash32) *hyperloglog.HyperLogLog {
+	hll := EmptyHLL()
+	var batch []string
+
+	for _, i := range items {
+		batch = append(batch, i)
+		h.Write([]byte(i))
+		hll.Add(h)
+		h.Reset()
+		stopLen := 3 * nBuckets
+		if hll.Count() >= uint64(stopLen) {
+			//if len(batch) >= stopLen {
+			return hll
+		}
+	}
+	return nil
+}
+
+//CheckItem looks if the ith item satisfy the attack requirements. Returns true if the itsm does not increase the cardinality
+func CheckBadItemWithoutReset(item string, nBuckets int, h hash.Hash32, hll *hyperloglog.HyperLogLog) bool {
+	prev := hll.Count()
+	h.Write([]byte(item))
+	hll.Add(h)
+	h.Reset()
+	return prev < hll.Count()
 }

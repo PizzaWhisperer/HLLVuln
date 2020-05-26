@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"hash"
-	"math/rand"
-	"time"
 
 	"./clarkduvall/hyperloglog"
 
@@ -27,6 +25,7 @@ func main() {
 	iterations := flag.Int("iterations", 1, "an int")
 	RT20 := flag.Bool("RT20", true, "a bool")
 	log := flag.Int("log", 0, "an int")
+	resets := flag.Int("resets", -1, "an int")
 	flag.Parse()
 
 	var originalEst uint64
@@ -60,7 +59,11 @@ func main() {
 		case "S3":
 			attackerItems = AttackS3(hll, nBuckets, hash(), *RT20, all)
 		case "S1":
-			attackerItems = AttackS1(nBuckets, hash(), *RT20, all)
+			if *resets == -1 {
+				attackerItems = AttackS1(nBuckets, hash(), *RT20, all)
+			} else {
+				attackerItems = AttackS1LessResets(nBuckets, hash(), *RT20, all, *resets)
+			}
 		default:
 			attackerItems = AttackS2(nBuckets, hash(), *RT20, all)
 		}
@@ -115,37 +118,46 @@ func AttackS1(nBuckets int, h hash.Hash32, rt20 bool, all []string) []string {
 	} else {
 		allItems = all
 	}
-
-	itemsCand := make(map[string]bool, len(allItems))
-	for _, s := range allItems {
-		itemsCand[s] = true
-	}
-	itemsCandList := Map2List(itemsCand)
-	var itemsDisc []string
-
-	//goal := len(allItems) / 2
-	//We want to keep the 50% best
-	step := 0
-	for step < 1 {
-		fmt.Printf("Step %d\n", step)
-		step++
-		//shuffle list
-		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(itemsCandList), func(i, j int) { itemsCandList[i], itemsCandList[j] = itemsCandList[j], itemsCandList[i] })
-		//hll with registers filled
-		hll := FillRegisters(nBuckets, itemsCandList, h)
-		//for each item, we check if it increases the count, if it does, we rm it
-		for _, item := range itemsCandList {
-			if CheckBadItem(item, nBuckets, h, hll) {
-				delete(itemsCand, item)
-				itemsDisc = append(itemsDisc, item)
+	continueBool := true
+	b := 60
+	lenAim := b * len(allItems) / nBuckets
+	aimCard := uint64(60) //uint64(nBuckets * int(math.Log(float64(nBuckets/(256-b)))))
+	switchCard := uint64(float64(nBuckets) * 2.5)
+	fmt.Printf("b %d, len aim %d, aimCard %d, switchCard %d\n", b, lenAim, aimCard, switchCard)
+	for continueBool {
+		hll := EmptyHLL()
+		var items2Discard []string
+		for _, s := range allItems {
+			prev := hll.Count()
+			h.Write([]byte(s))
+			hll.Add(h)
+			h.Reset()
+			newEst := hll.Count()
+			if newEst >= aimCard {
+				//fmt.Printf("count 0 %d\n", countZeros(hll.Reg))
+				//fmt.Printf("old card %d vs new %d\n", prev, newEst)
+				if newEst > switchCard {
+					//hll is not usefull anymore as it switched to HLL counting
+					//fmt.Printf("appened %d items\n", i)
+					//fmt.Printf("discarded %d elems\n", len(items2Discard))
+					break
+				} else {
+					//we are using LC
+					if prev != newEst {
+						//new bucket touched
+						items2Discard = append(items2Discard, s)
+					}
+				}
 			}
 		}
-		itemsCandList = Map2List(itemsCand)
-		//fmt.Printf("itemsCand size %d\n", len(itemsCand))
-		//fmt.Printf("disc size %d\n", len(itemsDisc))
+		if items2Discard == nil {
+			continueBool = false
+		}
+		allItems = RMItems(allItems, items2Discard)
+		items2Discard = nil
+		fmt.Printf("size of allit %d with aim %d\n", len(allItems), lenAim)
 	}
-	return itemsCandList
+	return allItems
 }
 
 //Attack under scenario S2
