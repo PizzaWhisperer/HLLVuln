@@ -20,7 +20,7 @@ Department of Computer Science, ETH Zurich\\
 
 %\IEEEtitleabstractindextext{%
 \begin{abstract}
-Computing the count of distinct elements in massive data sets is a common task but naive approaches are memory-expensive. The HyperLogLog (HLL) algorithm (Flajolet \emph{et al.}, 2007) estimates a data set's cardinality while using significantly less memory than a naive approach at the cost of some accuracy. This trade-off makes the HLL algorithm very attractive for a wide range of applications such as database management and network monitoring, where an exact count may not be needed. Recently, the HLL algorithm has started to be proposed for use in scenarios where the inputs may be adversarially generated, for example detection of network scanning attacks. This prompts an examination of the performance of the HLL algorithm in the face of adversarial inputs. In this cautionary note, we show that in such a setting, the HLL algorithm's estimate of cardinality can be exponentially bad: when an adversary has access to the internals of the HLL algorithm and has some flexibility in choosing what inputs will be recorded, it can manipulate the cardinality estimate to be exponentially smaller than the true cardinality.
+Computing the count of distinct elements in massive data sets is a common task but naive approaches are memory-expensive. The HyperLogLog (HLL) algorithm (Flajolet \emph{et al.}, 2007) estimates a data set's cardinality while using significantly less memory than a naive approach at the cost of some accuracy. This trade-off makes the HLL algorithm very attractive for a wide range of applications such as database management and network monitoring, where an exact count may not be needed. Recently, the HLL algorithm has started to be proposed for use in scenarios where the inputs may be adversarially generated, for example detection of network scanning attacks. This prompts an examination of the performance of the HLL algorithm in the face of adversarial inputs. We show that in such a setting, the HLL algorithm's estimate of cardinality can be exponentially bad: when an adversary has access to the internals of the HLL algorithm and has some flexibility in choosing what inputs will be recorded, it can manipulate the cardinality estimate to be exponentially smaller than the true cardinality.
 \end{abstract}
 %}
 
@@ -64,7 +64,7 @@ Let $\rho(s)$ be the position of the leftmost $1$-bit of $s$: e.g., $\rho(1...) 
 \vspace{0.5em}
 \textbf{for} $v \in \mathcal{M}$ \textbf{do}\\
     \hspace{2em} \textbf{set} $x := h(v);$\\
-    \hspace{2em} \textbf{set} $j = 1 + <x_1x_2...x_{n}>_2$; \hfill \textit{\{the binary address determined by the first $n$ bits of $x$\}}\\
+    \hspace{2em} \textbf{set} $j = 1 + <x_1x_2...x_{n}>_2$; \hfill \textit{\{the bucket index determined by the first $n$ bits of $x$\}}\\
     \hspace{2em} \textbf{set} $w := x_{n+1}x_{n+2}...$;\\
    \hspace{2em} \textbf{set} $M[j] :=$ max$(M[j], \rho(w))$;\\
 \vspace{0.2em}
@@ -203,7 +203,7 @@ As a second example, setting $B = 1$, we can expect to insert $2^{t-n}$ items wi
 
 \subsubsection{Initially Empty HLL Sketch, Scenario S1:} 
 
-Here the attack is somewhat more complex. We begin by explaining the core idea, then a simplistic version of our attack, then a more complex but performant version, and finally, we give a heuristic performance analysis of the attack.
+Here the attack is somewhat more complex. We begin by explaining the core idea, then a simple version of our attack, then a more complex but performant version, and finally, we give a heuristic performance analysis of the attack.
 
 Recall that in scenario S1, the adversary has access to a shadow HLL sketch which behaves identically to the target HLL sketch, and which can be reset at will. We will seek to minimise the number of resets performed in our attack, since we assume these are costly.  The adversary can also read out the HLL estimate of the shadow device at will. 
 
@@ -213,7 +213,7 @@ By repeated reprocessing, we will gradually remove items that do not hit the $B$
 
 By construction and from Lemma~\ref{lem:bound}, we are guaranteed that the cardinality estimate for the target HLL sketch will be at most $m \cdot \ln (m/V)$ where $V = m-B$. Assuming $h$ behaves like a random function, it is clear that the expected size of the final list ${\cal L}^*$ is $\frac{B}{m}\cdot |{\cal X}|$. Thus the attack's final performance is the same as that in scenarios S2 and S4 above (but more processing and resets are required).
 
-\paragraph{Simplistic Attack:}
+\paragraph{Simple Attack:}
 The simplistic version of our attack uses the above idea, inserting items $x$ into the shadow HLL sketch but resetting it as soon as the cardinality estimate increases from $B$ to $B+1$ (indicating that a non-target bucket has been hit by item $x$). Acting in this way precisely determines whether each inserted item hits the target buckets or not, so has no ``false positives'' which need to be eliminated through reprocessing of the list ${\cal L}$. This means that the attack can be carried out in a streaming fashion in a single pass over ${\cal X}$. Assuming $h$ behaves like a random function, we must perform a reset with probability $\frac{m-B}{m} = 1 - \frac{B}{m}$ per item inserted, and hence in total an expected number of $(1 - \frac{B}{m})\cdot 2^t$ resets.
 
 \paragraph{Complex Attack:}
