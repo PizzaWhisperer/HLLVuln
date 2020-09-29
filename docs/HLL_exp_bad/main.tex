@@ -62,10 +62,10 @@ Let $\rho(s)$ be the position of the leftmost $1$-bit of $s$: e.g., $\rho(1...) 
 \textbf{Algorithm} HyperLogLog (\textbf{input} ${\cal X}$ : multiset of items from domain $\mathcal{D}$).\\
 \textbf{initialize} a collection of $m$ registers, $M[1], ..., M[m]$, to $0$;\\
 \vspace{0.5em}
-\textbf{for} $v \in \cal X$ \textbf{do}\\
-    \hspace{2em} \textbf{set} $x := h(v);$\\
-    \hspace{2em} \textbf{set} $j = 1 + <x_1x_2...x_{n}>_2$; \hfill \textit{\{the bucket index determined by the first $n$ bits of $x$\}}\\
-    \hspace{2em} \textbf{set} $w := x_{n+1}x_{n+2}...$;\\
+\textbf{for} $x \in \cal X$ \textbf{do}\\
+    \hspace{2em} \textbf{set} $y := h(x);$\\
+    \hspace{2em} \textbf{set} $j = 1 + <y_1y_2...y_{n}>_2$; \hfill \textit{\{the bucket index determined by the first $n$ bits of $y$\}}\\
+    \hspace{2em} \textbf{set} $w := y_{n+1}y_{n+2}...$;\\
    \hspace{2em} \textbf{set} $M[j] :=$ max$(M[j], \rho(w))$;\\
 \vspace{0.2em}
 \textbf{compute} $E := \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}$; \hfill \textit{\{the raw HyperLogLog estimate\}}\\
