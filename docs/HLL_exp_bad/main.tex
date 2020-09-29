@@ -59,10 +59,10 @@ Let $\rho(s)$ be the position of the leftmost $1$-bit of $s$: e.g., $\rho(1...) 
 \textbf{define} $m = 2^n$ with $n \in [4..16].$\\
 \textbf{define} $\alpha_{16} = 0.673$; $\alpha_{32} = 0.697$; $\alpha_{64} = 0.709$; $\alpha_{m} = 0.7213/(1+ 1.079/m)$ for $m \ge 128$;\\
 \vspace{0.5em}
-\textbf{Algorithm} HyperLogLog (\textbf{input} $\mathcal{M}$ : multiset of items from domain $\mathcal{D}$).\\
+\textbf{Algorithm} HyperLogLog (\textbf{input} ${\cal X}$ : multiset of items from domain $\mathcal{D}$).\\
 \textbf{initialize} a collection of $m$ registers, $M[1], ..., M[m]$, to $0$;\\
 \vspace{0.5em}
-\textbf{for} $v \in \mathcal{M}$ \textbf{do}\\
+\textbf{for} $v \in \cal X$ \textbf{do}\\
     \hspace{2em} \textbf{set} $x := h(v);$\\
     \hspace{2em} \textbf{set} $j = 1 + <x_1x_2...x_{n}>_2$; \hfill \textit{\{the bucket index determined by the first $n$ bits of $x$\}}\\
     \hspace{2em} \textbf{set} $w := x_{n+1}x_{n+2}...$;\\
