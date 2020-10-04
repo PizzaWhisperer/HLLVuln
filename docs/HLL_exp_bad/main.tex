@@ -294,14 +294,14 @@ E = \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}.
 
 We assume the adversary has (or is given) some set of items ${\cal X}$ that it wishes to insert; as usual, we write $|{\cal X}| = 2^t$.
 
-\subsubsection{Initially Non-empty HLL Sketch, Scenario S2:} 
+\subsubsection{Initially Non-empty HLL Sketch, Scenario S2:}\label{sec:nonemptyHLLS2}
 The adversary knows $h$ so it selects items $x$ from ${\cal X}$ for which the $\ell$ rightmost bits of $h(x)$ start with a ``1'' bit. In this case, since the relevant bucket $j$ already has $M[j] \ge 1$, the bucket's counter is not updated, and the cardinality estimate of the HLL sketch remains unchanged. 
 
 The adversary then expects to be able to insert half of the items from ${\cal X}$ into the HLL sketch, without increasing the HLL cardinality estimate at all.
 
 If some buckets are actually empty (but the adversary does not know which ones in the blind setting of S2), then we may expect a moderate increase in the HLL cardinality estimate in the above attack. If the adversary suspects this is the case, then it can first insert $m$ carefully selected items into the target HLL sketch to ensure that $M[j] \ge 1$ for every bucket. This should increase its cardinality estimate by about $m$ (since HLL is a good cardinality estimator!). Then it can mount the attack, and be sure that it does not increase the cardinality estimate any further.
 
-\subsubsection{Initially Non-empty HLL Sketch, Scenario S4:} 
+\subsubsection{Initially Non-empty HLL Sketch, Scenario S4:}\label{sec:nonemptyHLLS4}
 The adversary can adopt the same strategy as for S2, but make the attack more efficient and reduce the sampling requirements with the additional information available in this scenario (namely, the count values $M[j]$ per bucket in the HLL sketch). Therefore, it can allow some leading zero bits in the $\ell$ rightmost bits of $h(x)$ so long as this does not increase the current bucket estimate. In other words, if $h(x)$ is mapped to the $j$-th bucket containing $M[j] \ge 1$, then, instead of the strict requirement of having a ``1'' bit in the first position in the $\ell$ rightmost bits of $h(x)$, the adversary is satisfied when there is a ``1'' bit in any of the first $M[j]$ positions in this substring. Under these conditions, the estimates in the buckets are never updated, and there is no effect on the cardinality estimate made by HLL.
 
 We now compute the expected number of elements $x$ from ${\cal X}$ such that $h(x)$ meets the attack's requirements. We assume that $M[j] \ge 1$ for all buckets $j$. Assume $h(x)$ is mapped to bucket $j$. Inserting $x$ does not increase the cardinality estimate if the rightmost $\ell$ bits of $h(x)$ have $M[j]-1$ or fewer leading zeroes; this probability is equal to $1-\frac{1}{2^{M[j]}}$ assuming $h$ behaves like a random function. Averaging over all $m$ buckets (and using the fact that the bucket choice is uniformly random since the bits of $h$ are independent and uniformly random), the probability that input $x$ meets the attack's requirements is given by:
@@ -310,11 +310,11 @@ We now compute the expected number of elements $x$ from ${\cal X}$ such that $h(
 & = &1 - H_M^{-1} 
 \end{eqnarray*}
 where $H_M$ is the harmonic mean of the counts $2^{M[1]}, 2^{M[2]}, \ldots, 2^{M[m]}$.
-So, given ${\cal X}$ containing $2^t$ items, the adversary can expect to insert $(1 - H_M)^{-1} \cdot 2^t$ items from ${\cal X}$ without increasing the HLL cardinality estimate at all.
+So, given ${\cal X}$ containing $2^t$ items, the adversary can expect to insert $(1 - H_M^{-1}) \cdot 2^t$ items from ${\cal X}$ without increasing the HLL cardinality estimate at all.
 
-If some buckets are actually empty (and in S4 the adversary knows which ones using its snapshot), then the above analysis can be reused in order to avoid touching those buckets altogether when inserting elements from ${\cal X}$. The above analysis does not change at all because the term $\frac{1}{m} \cdot (1-\frac{1}{2^{M[j]}})$ already signs a probability of 0 to inserting $x$ in bucket $j$ if $M[j] = 0$. Hence we still expect to insert $(1 - H_M)^{-1} \cdot 2^t$ items from ${\cal X}$ without increasing the HLL cardinality estimate at all. Of course, the adversary can relax its attack and allow some of the empty buckets to be hit as well. This would increase the insertion rate at the cost of an increase in the final cardinality estimate. 
+If some buckets are actually empty (and in S4 the adversary knows which ones using its snapshot), then the above analysis can be reused in order to avoid touching those buckets altogether when inserting elements from ${\cal X}$. The above analysis does not change at all because the term $\frac{1}{m} \cdot (1-\frac{1}{2^{M[j]}})$ already signs a probability of 0 to inserting $x$ in bucket $j$ if $M[j] = 0$. Hence we still expect to insert $(1 - H_M^{-1}) \cdot 2^t$ items from ${\cal X}$ without increasing the HLL cardinality estimate at all. Of course, the adversary can relax its attack and allow some of the empty buckets to be hit as well. This would increase the insertion rate at the cost of an increase in the final cardinality estimate. 
 
-In this setting, where the target HLL sketch is initially non-empty, we see that an adversary who has sufficient flexibility in its inputs (as represented by the size $2^t$ of the set ${\cal X}$) can expect to insert exponentially many (in $t$) values into the HLL sketch without increasing the cardinality estimate (or whilst increasing the cardinality estimate slightly in the case where the HLL sketch has some empty buckets in S2). The result is largely independent of the HLL parameters, but does depend on the extent to which the HLL sketch is already filled by other users, via a factor $1-(H_M)^{-1}$: the more full the HLL sketch is, the easier it is to insert new items without them increasing the cardinality estimate.
+In this setting, where the target HLL sketch is initially non-empty, we see that an adversary who has sufficient flexibility in its inputs (as represented by the size $2^t$ of the set ${\cal X}$) can expect to insert exponentially many (in $t$) values into the HLL sketch without increasing the cardinality estimate (or whilst increasing the cardinality estimate slightly in the case where the HLL sketch has some empty buckets in S2). The result is largely independent of the HLL parameters, but does depend on the extent to which the HLL sketch is already filled by other users, via a factor $1-H_M^{-1}$: the more full the HLL sketch is, the easier it is to insert new items without them increasing the cardinality estimate.
 
 \subsubsection{Initially Non-empty HLL Sketch, Scenario S1:} 
 
@@ -329,15 +329,54 @@ Finally, we briefly consider scenario S1 with an initially non-empty target HLL 
 
 %We omit further analysis of this scenario.
 
-\section{Analysis of the Redis Implementation}\label{sec:redis}
+\section{Analysis of the Redis HLL Implementation}\label{sec:redis}
 
-We present a brief analysis of the HLL implementation used in Redis, since Redis is a very popular key-value store implementation and the version of HLL used there differs significantly from that described in Figure~\ref{fig:hll}.
+We present a brief analysis of the HLL implementation used in Redis, since Redis is a very popular distributed, in-memory key-value store implementation and the version of HLL used there differs significantly from that described in Figure~\ref{fig:hll}.
 
-%and the version of HLL used in Redis, which relies on the maximum likelihood approach from~\cite{newhll} to perform corrections on cardinality estimates instead of the Hit Counting algorithm.
+HLL was first added to Redis in release 2.8.9 in April 2014. Redis 4.0 released in April 2017 introduced HLL Beta, which improves on the raw HLL cardinality estimator by using polynomial interpolation to reduce systematic errors. Redis 5.0 released in October 2018 replaces this with a new cardinality estimator based closely on the work of Ertl~\cite{hllnew}. This method is still used in the current release (Redis 6.0.8) and so is the object of our study here.
 
+Ertl~\cite{hllnew} proposed using the following cardinality estimator in place of the raw estimator in Figure~\ref{fig:hll}:
+\begin{equation}\label{eqn:ertl}
+\hat{\lambda}  = \frac{\alpha_\infty m^2}{m\sigma(C_0/m) + \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell}} \, .
+\end{equation}
+Here, in the denominator, $C_k$ denotes the number of buckets containing value $k$ in the HLL filter, so $C_0$ is in particular the number of empty buckets; $\sigma(\cdot)$ and $\tau(\cdot)$ are specific functions defined as:
+\[
+\sigma(x) :=  x + \sum_{k=1}^{\infty} x^{2^k} 2^{k-1}
+\]
+and
+\[
+\tau(x) :=  \frac{1}{2} \left( -x + \sum_{k=1}^{\infty} x^{2^{-k}} 2^{-k} \right).
+\]
+Finally,  $\alpha_\infty  = 0.72134752\ldots$ is a constant. (Note that we have translated from the original notation in~\cite{hllnew} to ours.)
+
+Redis 5.0 onwards uses exactly the formula in equation~(\ref{eqn:ertl}) to form its cardinality estimate. It uses $n=14$, $m=16,384$ and $\ell = 50$ (so $n+\ell = 64$ and a 64-bit hash function is used). 
+
+Note that when evaluating (\ref{eqn:ertl}), functions $\sigma$ and $\tau$ are only called on inputs in the range $[0,1]$. Moreover, in this range, we have $\sigma(x) \ge x$. Also it is highly likely that $C_{\ell+1} = 0$ (since it is very unlikely that a 50-bit all-0 string will result from the application of the Redis HLL hash function, and in any case in scenarios S2 and S4, we can always arrange for this to be avoided). When $C_{\ell+1} = 0$, $\tau$ is evaluated at 1, where its value is zero. Combining this information, we see that, provided $C_{\ell+1} = 0$, we have:
+\[
+m\sigma(C_0/m) + \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell} \ge m\sigma(C_0/m) \ge C_0
+\]
+and so
+\[
+\hat{\lambda}  \leq \frac{\alpha_\infty m^2}{C_0}
+\]
+where, recall, $C_0$ is the number of empty buckets.
+
+Attacks are now straightforward. Suppose we can arrange that $C_0$, the number of empty buckets, stays above ${\epsilon}m$, a linear function of the total number of buckets, and that $C_{\ell+1} = 0$. Then we obtain $\hat{\lambda}  \leq \alpha_\infty \epsilon^{-1} m$, a linear function of $m$. For example, we can set $\epsilon = 1/2$ to obtain $\hat{\lambda}  \leq 2\alpha_\infty m$, where recall that $\alpha_\infty$ is about $0.72$, hence $\hat{\lambda}  \leq 1.44m$.
+
+The requirement on $C_0 \geq {\epsilon}m$ is easily met in scenarios S2 and S4 with an initially empty HLL filter, through the usual trick of sampling inputs $x \in {\cal X}$ so that only a fraction $1-\epsilon$ of the buckets are ever hit. We can expect to insert a fraction $1-\epsilon-\epsilon2^{-\ell}$ of the elements of  ${\cal X}$ whilst keeping the cardinality estimate $\hat{\lambda}$ below  $\alpha_\infty \epsilon^{-1} m$. (The term $\epsilon2^{-\ell}$ arises from the requirement to keep $C_{\ell+1} =0$ in the attack; recall that $\ell=50$ in Redis, so the effect of this term is very small.) 
+
+In scenarios S2 and S4 with an initially non-empty HLL filter, we assume as for our earlier analysis of the standard HLL algorithm that all buckets have already been hit (this will be the case with high probability as soon as $m \log m$ items have been honestly inserted). Hence $C_0 = 0$ and $\sigma$ is evaluated at 0 in (\ref{eqn:ertl}), where its value is 0. This means that the estimate $\hat{\lambda}$ is computed using a denominator of the form:
+\[
+\sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell}.
+\]
+Now we can proceed exactly as in Sections~\ref{sec:nonemptyHLLS2} and~~\ref{sec:nonemptyHLLS4}, inserting values $x$ whose hashes have rightmost $\ell$ bits beginning with a ``1'' bit (and with a more relaxed condition in S4). These insertions do not alter the values of the $C_k$, and hence $\hat{\lambda}$ is unaffected. In S2, we expect to insert half the items in ${\cal X}$ without increasing the cardinality estimate $\hat{\lambda}$ at all. In S4, we can insert even more items. The analysis can be extended in S4 to the case where some of the buckets are still empty: in S4 we can avoid hitting these empty buckets and again the cardinality estimate does not increase at all.
+
+This completes our analysis of Redis. The key takeaway is that an adversary can expect to insert a constant fraction of ${\cal X}$ into a non-empty Redis HLL filter whilst not increasing its cardinality estimate at all (and whilst keeping the estimated cardinality linear in $m$ in the case where the filter is initially empty).
+
+\todo{What about S1 here? Seems harder because we may not get accurate HLL estimates due to rounding again. We need to show that decreasing $C_0$ by 1 is noticeable in Ertl's formula even with rounding.}
 
 \section{Experimental Results}\label{sec:exp}
-Many different implementations of HLL are available online. Among the repositories collecting more than 350 stars on GitHub are ~\cite{clahll,datasketch}. HLL is also featured in many frameworks, including Redis~\cite{redis}, Google's BigQuery~\cite{bigquery}, Facebook's Airlift~\cite{airlift} and several products of Apache such as Spark~\cite{spahll} and Druid~\cite{druhll}. It is interesting to point out that all these implementations use a constant number of buckets and a fixed hash function. Thus they are potentially vulnerable to our attacks in scenarios S2 and S4.
+Many different implementations of HLL are available online. Among the repositories collecting more than 350 stars on GitHub are ~\cite{clahll,datasketch}. HLL is also featured in many frameworks, including Redis~\cite{redis}, Google's BigQuery~\cite{bigquery}, Facebook's Airlift~\cite{airlift} and several products of Apache such as Spark~\cite{spahll} and Druid~\cite{druhll}. It is interesting to point out that all these implementations use a constant number of buckets and a fixed hash function. Thus they are potentially vulnerable to our attacks.
 
 As a proof-of-concept, we implemented our attacks against the HLL implementation from~\cite{clahll}, since it is faithful to the original description of HLL given in~\cite{hll}.\footnote{Our attack code is available at \href{https://github.com/PizzaWhisperer/HLLVuln}{\url{https://github.com/PizzaWhisperer/HLLVuln}}.} 
 \todo{We need to make sure the repo is publicly accessible but anonymised for submission, if we are going to include it.}
