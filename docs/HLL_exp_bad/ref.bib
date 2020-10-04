@@ -1,5 +1,5 @@
 @inproceedings{hll,
-  TITLE = {HyperLogLog: the analysis of a near-optimal cardinality estimation algorithm},
+  TITLE = {{HyperLogLog}: the analysis of a near-optimal cardinality estimation algorithm},
   AUTHOR = {Flajolet, Philippe and Fusy, {\'E}ric and Gandouet, Olivier and Meunier, Fr{\'e}d{\'e}ric},
   URL = {https://hal.inria.fr/hal-00406166},
   BOOKTITLE = {Proceedings of the International Conference on Analysis of Algorithms (AOFA)},
@@ -8,7 +8,7 @@
 }
 
 @article{portscanhll,
-    title = {How can sliding HyperLogLog and EWMA detect port scan attacks in IP traffic?},
+    title = {How can sliding {HyperLogLog} and {EWMA} detect port scan attacks in {IP} traffic?},
     author = {Yousra Chabchoub and Raja Chiky and Betul Dogan},
     year = {2014},
     doi = {10.1186/1687-417X-2014-5},
@@ -16,27 +16,46 @@
     journal = {EURASIP Journal on Information Security},
 }
 
-@article{newhll,
-  title={New cardinality estimation algorithms for HyperLogLog sketches},
-  author={Ertl, Otmar},
-  journal={arXiv},
-  year={2017}
+@article{hllnew,
+  author    = {Otmar Ertl},
+  title     = {New Cardinality Estimation Methods for HyperLogLog Sketches},
+  journal   = {CoRR},
+  volume    = {abs/1706.07290},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1706.07290},
+  archivePrefix = {arXiv},
+  eprint    = {1706.07290},
+  timestamp = {Mon, 13 Aug 2018 16:48:13 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/Ertl17b.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
-@inproceedings{hllpratice,
-  title={HyperLogLog in practice: algorithmic engineering of a state of the art cardinality estimation algorithm},
+@inproceedings{hllpractice,
+  title={{HyperLogLog} in practice: algorithmic engineering of a state of the art cardinality estimation algorithm},
   author={Heule, Stefan and Nunkesser, Marc and Hall, Alexander},
   booktitle={Proceedings of the 16th International Conference on Extending Database Technology},
   pages={683--692},
   year={2013}
 }
 
-@ARTICLE{hllvuln,
-    author={P. {Reviriego} and D. {Ting}},
-    journal={IEEE Communications Letters},
-    title={Security of HyperLogLog (HLL) Cardinality Estimation: Vulnerabilities and Protection},
-    year={2020},
+
+@article{hllvuln,
+  author    = {Pedro Reviriego and
+               Daniel Ting},
+  title     = {Security of HyperLogLog {(HLL)} Cardinality Estimation: Vulnerabilities
+               and Protection},
+  journal   = {{IEEE} Commun. Lett.},
+  volume    = {24},
+  number    = {5},
+  pages     = {976--980},
+  year      = {2020},
+  url       = {https://doi.org/10.1109/LCOMM.2020.2972895},
+  doi       = {10.1109/LCOMM.2020.2972895},
+  timestamp = {Thu, 20 Aug 2020 22:44:50 +0200},
+  biburl    = {https://dblp.org/rec/journals/icl/ReviriegoT20.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+
 
 @article{hitcounting,
     author={Kyu-Young Whang and Brad Vander-Zanden and Howard Taylor},
@@ -56,7 +75,7 @@
 
 @article{loglog,
     author = "Marianne Durand and Philippe Flajolet",
-    title = "{LogLog Counting of Large Cardinalities}",
+    title = "{{LogLog} Counting of Large Cardinalities}",
     year = "2003",
     pages = {605--617},
     journal = {Annual European Symposium on Algorithms (ESA)},
@@ -73,7 +92,7 @@
 @inproceedings{slidinghll,
     author = {Chabchoub, Yousra and Hebrail, Georges},
     year = "2010",
-    title = "{Sliding HyperLogLog: estimating cardinality in a data stream over a sliding window}.",
+    title = "{Sliding {HyperLogLog}: estimating cardinality in a data stream over a sliding window}.",
     booktitle = {Proceedings of the 2010 IEEE International Conference on Data Mining Workshops},
     pages={1297--1303},
 }
@@ -82,7 +101,7 @@
     howpublished = {Online: \url{https://engineering.fb.com/data-infrastructure/hyperloglog/}},
     year = {2018},
     author = {Mehrdad Honarkhah and Arya Talebzadeh},
-    title = {HyperLogLog in Presto: A significantly faster way to handle cardinality estimation},
+    title = {{HyperLogLog} in {Presto}: A significantly faster way to handle cardinality estimation},
     note = {Accessed: 2020-04-28},
 }
 
