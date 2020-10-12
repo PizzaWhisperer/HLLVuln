@@ -496,7 +496,7 @@ Suppose ${\cal A}$ is an S4 adversary against HLL instantiated with a keyed func
 Moreover, if ${\cal A}$ makes $q$ queries to its \texttt{insert($\cdot$)} oracle, then ${\cal B}$ makes $q$ queries to its real or random oracle. Finally, the running time of ${\cal B}$ is (roughly) the same as that of ${\cal A}$.
 \end{theorem}
 
-The interpretation of the above theorem is that if $F$ is a good PRF, then $\mbox{Adv}^{\tiny\mbox{PRF}}_{F}({\cal B})$ should be small for any adversary ${\cal B}$ running in a reasonable amount of time. Hence we can conclude that the advantage of any S4 adversary against HLL using PRF $F$ is also small. 
+The interpretation of the above theorem is that if $F$ is a good PRF, then $\mbox{Adv}^{\mbox{\tiny PRF}}_{F}({\cal B})$ should be small for any adversary ${\cal B}$ running in a reasonable amount of time. Hence we can conclude that the advantage of any S4 adversary against HLL using PRF $F$ is also small. 
 
 \begin{proof}
 PRF adversary ${\cal B}$ against $F$ is built as follows. Let $d$ denote the hidden bit determining whether ${\cal B}$ receives real responses of the form $F(K,x)$ where $K$ is a uniformly random key ($d=0$) or responses from a truly random function ($d=1$); ${\cal B}$ runs S4 adversary ${\cal A}$ and responds to each of its queries as follows:
