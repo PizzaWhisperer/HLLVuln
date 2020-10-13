@@ -1,4 +1,18 @@
-\documentclass[11pt]{article}
+\newif\ifeprint
+%\eprinttrue
+\eprintfalse
+
+\ifeprint
+\documentclass{article}
+\usepackage{geometry}
+\usepackage[dvipsnames]{xcolor}
+\else
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{usenix-2020-09}
+\fi
+
+%\documentclass[11pt]{article}
 \usepackage{graphicx, amsmath, amsthm, amssymb, setspace, array, url, hyperref, xspace, todonotes, pifont}
 \usepackage{a4wide}
 \usepackage[utf8]{inputenc}
@@ -69,7 +83,7 @@ Some works building on~\cite{hll} replace the Hit Counting algorithm by other sc
 
 An interesting property of HLL is that it supports merging in a lossless way. To combine two buckets at index $i$ in two different HLL instances, one can take the maximum of the two bucket entries and assign that to the matching bucket $i$ in the merged HLL sketch. Such a simple set union operation allows easy parallelisation of operations among multiple machines independently, provided they use the same hash function and the same number of buckets. Clearly this procedure cannot be carried out if the different HLL sketches are differently seeded or keyed.
 
-\begin{figure}[tb!]
+\begin{figure*}[tb!]
 \centering
      \makebox[\linewidth]{
 \fbox{
@@ -104,7 +118,7 @@ For $s$ of bit-length $\ell$, let $\rho(s)$ denote the position of the leftmost 
 }}
 \caption{The HyperLogLog Algorithm from~\cite{hll}}
 \label{fig:hll}
-\end{figure}
+\end{figure*}
 
 
 
@@ -358,9 +372,9 @@ Finally,  $\alpha_\infty  = 0.72134752\ldots$ is a constant. (Note that we have 
 
 Redis 5.0 onwards uses exactly the formula in equation~(\ref{eqn:ertl}) to form its cardinality estimate. It uses $n=14$, $m=16,384$ and $\ell = 50$ (so $n+\ell = 64$ and a 64-bit hash function is used). 
 
-Note that when evaluating (\ref{eqn:ertl}), functions $\sigma$ and $\tau$ are only called on inputs in the range $[0,1]$. Moreover, in this range, we have $\sigma(x) \ge x$. Also it is highly likely that $C_{\ell+1} = 0$ (since it is very unlikely that a 50-bit all-0 string will result from the application of the Redis HLL hash function, and in any case in scenarios S2 and S4, we can always arrange for this to be avoided). When $C_{\ell+1} = 0$, $\tau$ is evaluated at 1, where its value is zero. Combining this information, we see that, provided $C_{\ell+1} = 0$, we have:
+Note that when evaluating (\ref{eqn:ertl}), functions $\sigma$ and $\tau$ are only called on inputs in the range $[0,1]$. Moreover, in this range, we have $\sigma(x) \ge x$. Also it is highly likely that $C_{\ell+1} = 0$ (since it is very unlikely that a 50-bit all-0 string will result from the application of the Redis HLL hash function, and in any case in scenarios S2 and S4, we can always arrange for this to be avoided). When $C_{\ell+1} = 0$, $\tau$ is evaluated at 1, where its value is zero. Combining this information, we see that, provided $C_{\ell+1} = 0$, and letting $D$ denote the denominator in equation~(\ref{eqn:ertl}), we have:
 \[
-m\sigma(C_0/m) + \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell} \ge m\sigma(C_0/m) \ge C_0
+D \ge m\sigma(C_0/m) \ge C_0
 \]
 and so
 \[
@@ -408,8 +422,8 @@ Secondly, when attacking an empty HLL sketch, we can see that in all scenarios, 
 
 We can also compare our results from Table~\ref{table:tab2} with results from the attack presented in~\cite[Section 5.1]{hllvuln}. In that paper, the authors target the Redis implementation of HLL and perform the attack against an empty sketch filled with adversarial inputs only. Given a set of 250,000 items, the adversary could choose ``74,390 distinct items and obtain an HLL estimate of only 15,780''~\cite{hllvuln}, achieving a five-fold reduction from the true cardinality after 4 iterations (resets). As explained in Section~\ref{sec:redis}, the Redis implementation analysed in~\cite{hllvuln} does not conform precisely to the original HLL algorithm as presented in Figure~\ref{fig:hll}. Also as discussed in Section~\ref{sec:redis}, the Redis implementation has changed its HLL algorithm several times in recent releases, but the authors of~\cite{hllvuln} do not specify which version was used in their experiments. This makes it difficult to make a precise comparison with their results. Nevertheless, the S1 adversary following our strategy against the classical HLL algorithm is able to add 977 and 97,433 distinct items while holding the cardinality estimate at 1 and 126, respectively. Compared to~\cite{hllvuln}, we can reduce the cardinality estimate by a factor of almost 1,000 instead of 5. This comes at the cost of performing more resets compared to~\cite{hllvuln}. 
 
-\begin{table}[tb!]
-\centering
+\begin{table*}[tb!]
+\small\centering
 \caption{Attack results, averaged over 30 iterations.}
 \medskip
      \makebox[\linewidth]{
@@ -423,10 +437,10 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
     \textbf{Final Card. Est.} & 1 & 126 & 1,011 & 1 & 1,005 & 1 \\ \hline
 \end{tabular}}
 \label{table:tab1}
-\end{table}
+\end{table*}
 
-\begin{table}[tb!]
-\centering
+\begin{table*}[tb!]
+\small\centering
 \caption{Attack results, averaged over 30 iterations, in the setting of~\cite{hllvuln}.}
 \medskip
      \makebox[\linewidth]{
@@ -440,7 +454,7 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
     \textbf{Final Card. Est.} & 1 & 126 & 1,058 & 1 & 998 & 1 \\ \hline
 \end{tabular}}
 \label{table:tab2}
-\end{table}
+\end{table*}
 
 \section{Formal Security Analysis}\label{sec:formal}
 
@@ -457,9 +471,7 @@ For scenarios S2, S3 and S4, the picture is much more positive. In the remainder
 
 We then show that, if $h$ is replaced by a keyed Pseudo Random Function (PRF) $F$ whose key is not available to the adversary, then any adversary ${\cal A}$ that can distinguish between the real and random worlds with oracles as in S4 can be used to build an adversary ${\cal B}$ which breaks the PRF security of $F$. Under the assumption that $F$ is a good PRF, no such efficient adversary ${\cal B}$ can exist, and we may conclude that we can safely switch from the real world to the ideal world without incurring any significant change to the behaviour of ${\cal A}$. 
 
-However, it is clear that any adversary in the ideal world is reduced to operating in the setting used in the average case analysis of HLL (wherein every insertion query results in a random value $y$ being used to update the HLL). Thus, ${\cal A}$ can have no advantage when it comes to influencing the HLL cardinality estimate. It follows that HLL, when instantiated with a keyed PRF, is secure against attacks in S4 (and therefore in the weaker attacks models S2 and S3 as well).
-
-We will conclude by describing how the necessary keyed PRF can be instantiated.
+However, it is clear that any adversary in the ideal world is reduced to operating in the setting used in the average case analysis of HLL (wherein every insertion query results in a random value $y$ being used to update the HLL). Thus, ${\cal A}$ can have no advantage when it comes to influencing the HLL cardinality estimate. It follows that HLL, when instantiated with PRF $F$, is secure against attacks in S4 (and therefore in the weaker attacks models S2 and S3 as well). We will conclude by discussing how $F$ can be instantiated.
 
 We note that our formal security analysis could be conducted using the framework recently laid out in~\cite{CCS:ClaPatShrPS19}. However, we prefer to give a compact and self-contained treatment here.
 
@@ -473,7 +485,7 @@ We consider adversary ${\cal A}$ to be an algorithm running against a challenger
 The four oracles that  ${\cal A}$ can interact with are as follows:
 \begin{itemize}
 \item \texttt{init}: this oracle performs initialisation of the HLL (and selection of the PRF key when $h$ is replaced by a PRF $F$); this oracle is available in all of S2, S3, S4, but can only be called once as ${\cal A}$'s first oracle query.
-\item \texttt{insert($\cdot$)}: on input $x \in {\cal X}$, the oracle inserts value $x$ into the HLL. This oracle is available in all of S2, S3, S4. Without loss of generality (since HLL and variants of it we consider here have a deterministic insertion procedure), we assume all queries $x$ made by ${\cal A}$ to \texttt{insert($\cdot$)} are distinct. We let $q$ denote the number of insertion queries made by ${\cal A}$ during the course of its attack.
+\item \texttt{insert($\cdot$)}: on input $x \in {\cal D}$, the oracle inserts value $x$ into the HLL. This oracle is available in all of S2, S3, S4. Without loss of generality (since HLL and variants of it we consider here have a deterministic insertion procedure), we assume all queries $x$ made by ${\cal A}$ to \texttt{insert($\cdot$)} are distinct. We let $q$ denote the number of insertion queries made by ${\cal A}$ during the course of its attack.
 \item \texttt{read}: this oracle returns the HLL cardinality estimate. We allow multiple queries to this oracle and make it available to ${\cal A}$ in S3 and S4, but not S2.
 \item \texttt{corrupt}: this oracle returns the vector $(M[j])_{j=1}^{m}$ of HLL bucket contents (but not any secret key $K$). This oracle is available only in S4. We allow the adversary to query \texttt{corrupt} as often as it wishes during its attack. Our description of S4 in Section~\ref{sec:attacks} limited the adversary to at most one such query; we allow multiple queries here because doing so does not increase the difficulty of achieving security.  
 \end{itemize}
@@ -482,7 +494,7 @@ We note that in S4 (and only in S4) the adversary has access to all four oracles
 
 \subsection{Security Proof for HLL Using a PRF}
 
-We now replace the hash function $h$ acting on ${\cal X}$ from the HLL algorithm with a keyed function $F: \{0,1\}^k \times {\cal X} \rightarrow  \{0,1\}^{n+\ell}$. Here the first input to $F$ is a $k$-bit string, the key, denoted $K$. We assume that \texttt{init} in the HLL security model now initialises key $K$ by selecting it uniformly at random from $\{0,1\}^k$.
+We now replace the hash function $h$ acting on ${\cal D}$ from the HLL algorithm with a keyed function $F: \{0,1\}^k \times {\cal D} \rightarrow  \{0,1\}^{n+\ell}$. Here the first input to $F$ is a $k$-bit string, the key, denoted $K$. We assume that \texttt{init} in the HLL security model now initialises key $K$ by selecting it uniformly at random from $\{0,1\}^k$.
 
 We define the PRF advantage of an adversary ${\cal B}$ against $F$ outputting a bit $d'$ as being its advantage in distinguishing whether it is interacting with $F$ for a uniformly random key $K$ ($d=0$) or interacting with a truly random function ($d=1$). Thus: 
 \[
@@ -493,7 +505,7 @@ Here, we assume without loss of generality that all of ${\cal B}$'s queries are 
 Now we are ready to state:
 
 \begin{theorem}\label{thm:security-of-HLL-with-PRF}
-Suppose ${\cal A}$ is an S4 adversary against HLL instantiated with a keyed function $F: \{0,1\}^k \times {\cal X} \rightarrow  \{0,1\}^{n+\ell}$. Then we can construct from ${\cal A}$ a PRF adversary ${\cal B}$ against $F$ such that:
+Suppose ${\cal A}$ is an S4 adversary against HLL instantiated with a keyed function $F: \{0,1\}^k \times {\cal D} \rightarrow  \{0,1\}^{n+\ell}$. Then we can construct from ${\cal A}$ a PRF adversary ${\cal B}$ against $F$ such that:
 \[
 \mbox{Adv}^{\mbox{\tiny S4-RoI}}_{\mbox{\tiny HLL}}({\cal A}) = \mbox{Adv}^{\mbox{\tiny PRF}}_{F}({\cal B}) \,.
 \]
@@ -506,7 +518,7 @@ The interpretation of the above theorem is that if $F$ is a good PRF, then $\mbo
 PRF adversary ${\cal B}$ against $F$ is built as follows. Let $d$ denote the hidden bit determining whether ${\cal B}$ receives real responses of the form $F(K,x)$ where $K$ is a uniformly random key ($d=0$) or responses from a truly random function ($d=1$); ${\cal B}$ runs S4 adversary ${\cal A}$ and responds to each of its queries as follows:
 \begin{itemize}
 \item \texttt{init}: here ${\cal B}$ initialises an HLL filter in accordance with Figure~\ref{fig:hll}. Thus it initialises an array $M[j]$ in which each entry is set to 0. 
-\item \texttt{insert($\cdot$)}: on input $x \in {\cal X}$,  ${\cal B}$ makes a query on $x$ to its real-or-random oracle and receives value $y$; ${\cal B}$ uses $y$ to update the HLL bucket $j$ generated via $j=1 + <y_1y_2...y_{n}>_2$ as in the regular HLL algorithm (shown in Figure~\ref{fig:hll}).
+\item \texttt{insert($\cdot$)}: on input $x \in {\cal D}$,  ${\cal B}$ makes a query on $x$ to its real-or-random oracle and receives value $y$; ${\cal B}$ uses $y$ to update the HLL bucket $j$ generated via $j=1 + <y_1y_2...y_{n}>_2$ as in the regular HLL algorithm (shown in Figure~\ref{fig:hll}).
 \item \texttt{read}: ${\cal B}$ uses its knowledge of the buckets' contents to compute and return the HLL cardinality estimate in accordance with Figure~\ref{fig:hll}. 
 \item \texttt{corrupt}: ${\cal B}$ returns the vector $(M[j])_{j=1}^{m}$ of HLL bucket contents. 
 \end{itemize}
@@ -519,11 +531,11 @@ Finally, we conclude our analysis by reiterating the key point: we have shown th
 
 \subsection{Instantiating the PRF}
 
-The above construction requires a PRF $F: \{0,1\}^k \times {\cal X} \rightarrow  \{0,1\}^{n+\ell}$. Here, the set ${\cal X}$ represents the space of possible inputs to the HLL which can be modelled by a set of bit-strings of some maximum length. This mean that $F$ needs to be Variable Input Length PRF (VIL-PRF). 
+The above construction requires a PRF $F: \{0,1\}^k \times {\cal D} \rightarrow  \{0,1\}^{n+\ell}$. Here, the set ${\cal D}$ represents the space of possible inputs to the HLL which can be modelled by a set of bit-strings of some maximum length. This mean that $F$ needs to be Variable Input Length PRF (VIL-PRF). 
 
 Making $F$ competitive in speed with existing implementations of HLL, which use non-cryptographic hash functions such as Murmur3, is challenging, and in practice we must sacrifice some speed for security.
 
-A particularly simple construction for $F$ involves composing a collision-resistant hash function $H: {\cal X} \rightarrow  {\cal D}$ onto some domain ${\cal D}$ with a PRF $G: \{0,1\}^k \times {\cal D} \rightarrow \{0,1\}^{n+\ell}$, viz: $F(K,x) = G(K,H(x))$. It is easy to show that the result is a PRF of the required input-output signature (see for example~\cite[Section 8.2]{BonehShoup}). As a concrete instantiation, one could take $H$ to be SHA-256 with outputs truncated to 128 bits and $G$ to be AES-128 truncated to ${n+\ell}$ bits (since ${n+\ell} \leq 64 < 128$ in practice, this truncation is always possible). 
+A particularly simple construction for $F$ involves composing a collision-resistant hash function $H: {\cal D} \rightarrow  {\cal E}$ onto some domain ${\cal E}$ with a PRF $G: \{0,1\}^k \times {\cal E} \rightarrow \{0,1\}^{n+\ell}$, viz: $F(K,x) = G(K,H(x))$. It is easy to show that the result is a PRF of the required input-output signature (see for example~\cite[Section 8.2]{BonehShoup}). As a concrete instantiation, one could take $H$ to be SHA-256 with outputs truncated to 128 bits and $G$ to be AES-128 truncated to ${n+\ell}$ bits (since ${n+\ell} \leq 64 < 128$ in practice, this truncation is always possible). 
 
 An alternative is to simply use HMAC-SHA-256 with an appropriately truncated output. HMAC is a PRF under reasonable assumptions on the hash function used in its construction~\cite{Bellare15}. 
 
