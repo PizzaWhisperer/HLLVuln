@@ -534,9 +534,13 @@ The above construction requires a PRF $F: \{0,1\}^k \times {\cal D} \rightarrow 
 
 We want $F$ to be competitive with non-cryptographic hashing on small input sizes, as typical in current HLL implementations and applications (e.g.\ MurmurHash3 applied to an IP header). This makes off-the-shelf approaches like HMAC uncompetitive, since even for the shortest inputs, HMAC would require 4 evaluations of the underlying hash compression function.
 
-SipHash~\cite{AumassonB12} is designed specifically for this use case. It is competitive in speed with non-cryptographic hash functions commonly used in HLL implementations such as MurmurHash3. It has also withstood cryptanalysis well~\cite{DobraunigMS14,XinLSL19}. It has 128-bit outputs that can be truncated to the needs of typical HLL implementations (32 and 64 bits).%and is well supported in libraries such as OpenSSL.  
+SipHash~\cite{AumassonB12} is designed specifically for this use case. It is competitive in speed with non-cryptographic hash functions commonly used in HLL implementations such as MurmurHash3. It has also withstood cryptanalysis well~\cite{DobraunigMS14,XinLSL19}. It has 128-bit outputs that can be truncated to the needs of typical HLL implementations (32 and 64 bits). %and is well supported in libraries such as OpenSSL.  
+Our microbenchmarks created on an Intel i7 CPU show that SipHash-2-4 on 90-byte inputs requires 102ns per evaluation, while the 128-bit version of MurmurHash3 takes 60ns. Meanwhile, HMAC-SHA256 requires 705ns. We obtained similar performance ratios for other input sizes. These together show that SipHash is quite competitive with MurmurHash3.
 
-For example, our microbenchmarks created on an Intel i7 CPU show that SipHash-2-4 is as fast as the 128-bit version of MurmurHash3 and only slightly slower than the original 32-bit version.
+%is as fast as the 128-bit version of MurmurHash3 and only slightly slower than the original 32-bit version.
+
+%length: 720, time h_mac 705ns, time h_murmur 60ns and time h_sip 102ns
+
 
 %Making $F$ competitive in speed with existing implementations of HLL, which use non-cryptographic hash functions such as Murmur3, is challenging, and in practice we must sacrifice some speed for security.
 
