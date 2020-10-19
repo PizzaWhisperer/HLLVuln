@@ -203,7 +203,7 @@ We divide our analysis into two cases: when the HLL sketch is initially empty (a
 We begin with a preliminary lemma, applying to an adversary operating against an initially empty sketch (in any of S1, S2, S4). As usual, we have $m=2^n$ buckets, while $n+\ell$ is the output length of the employed hash function $h$.
 
 \begin{lemma}\label{lem:bound}
-Suppose an adversary inserts elements $x$ from some set ${\cal X}$ into an initially empty HLL sketch. Suppose the adversary can guarantee that in its attack, only a subset of size $B$ out of $2^m$ buckets are hit, where $B \leq B_{\max}$ with 
+Suppose an adversary inserts elements $x$ from some set ${\cal X}$ into an initially empty HLL sketch. Suppose the adversary can guarantee that in its attack, only a subset of size $B$ out of $m$ buckets are hit, where $B \leq B_{\max}$ with 
 \[
 B_{\max} := \left\lfloor m\cdot\left(1-\frac{2\alpha_m}{5}\right)\cdot\left(1-2^{-(\ell+1)}\right)^{-1} \right\rfloor. \label{eqn:1} 
 \]
