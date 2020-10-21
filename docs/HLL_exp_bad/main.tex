@@ -59,7 +59,7 @@ The rest of the paper is organised as follows. Section~\ref{sec:related} immedia
 
 \subsection{Related Work}\label{sec:related}
 
-Desfontaines \emph{et al.}~\cite{cardestprivacy} studied the privacy properties of HLL in two different attack scenarios, referred to as \emph{insider} and \emph{external}. The attack target of~\cite{cardestprivacy} is different from ours, being focussed on privacy breaches, whereas we care about manipulating cardinality estimation. 
+Desfontaines \emph{et al.}~\cite{cardestprivacy} studied the privacy properties of HLL in two different attack scenarios, referred to as \emph{insider} and \emph{external}. The attack target of~\cite{cardestprivacy} is different from ours, being focused on privacy breaches, whereas we care about manipulating cardinality estimation. 
 %It is argued in~\cite{cardestprivacy} that HLL can be used by organisations to store and process location data, which is inherently sensitive, so losing privacy would leak users' locations and potentially cause great harm. 
 We discuss the two attack scenarios from~\cite{cardestprivacy} in more detail in Section~\ref{sec:attacks}.
 
@@ -71,7 +71,7 @@ Both~\cite{cardestprivacy,hllvuln} propose mitigations using a salted HLL sketch
 %This might not be a convenient solution for some applications, they thus encourage further research.
 
 Our work relates to the broader study of the performance of probabilistic data structures in adversarial environments.
-Clayton \emph{et al.}~\cite{CCS:ClaPatShrPS19} recently provided a provable-security treatment of this topic. They used their formalism to analyze Bloom filters, counting (Bloom) filters and count-min sketch data structures, but not HLL. Prior work also focussed on Bloom filters~\cite{NaorY15,GerbetKL15} or flooding of hash tables~\cite{LiptonN93,CrosbyW03}. References~\cite{GerbetKL15,CCS:ClaPatShrPS19} provide comprehensive summaries of prior work in this area. 
+Clayton \emph{et al.}~\cite{CCS:ClaPatShrPS19} recently provided a provable-security treatment of this topic. They used their formalism to analyze Bloom filters, counting (Bloom) filters and count-min sketch data structures, but not HLL. Prior work also focused on Bloom filters~\cite{NaorY15,GerbetKL15} or flooding of hash tables~\cite{LiptonN93,CrosbyW03}. References~\cite{GerbetKL15,CCS:ClaPatShrPS19} provide comprehensive summaries of prior work in this area. 
 
 %It is an interesting open problem to use their framework to develop a formal understanding of how HLL can be made secure in the adversarial setting. 
 
