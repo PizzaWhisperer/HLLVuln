@@ -1,0 +1,533 @@
+﻿Rebuttal text
+
+
+We thank the reviewers for their detailed comments. We will fix all typos and reduce (!) the margins. We address key comments from each reviewer in turn.
+
+
+Reviewer A:
+
+
+We agree that HLL is obviously unsound in S2, S3, S4. Yet we seem to be amongst the first to point this out. Every system we looked at uses HLL in an unkeyed fashion. Examples include Google BigQuery, PrestoDB and Redis. We think usage of HLL is becoming widespread. It certainly has been proposed for use in adversarial settings without any mention of keying [2,3,5]. Moreover, our attacks in S2, S3, S4 go beyond the trivially obvious attacks by exploiting HLL’s use of “small range correction” to get more powerful attacks (we will add explicit mention of this and comparison to the paper). So this paper is more than a blogpost/bug report.
+
+
+Resetting a shadow device (which could be a network switch) might involve rebooting it. This would be costly in time, so the attacker wants to minimise the number of resets (as envisaged by Reviriego and Ting [6]).
+
+
+We do give estimates (including the constants) for both the number of insertions N_I and resets N_R in both the “simple” and “complex” attacks in S1. We only used the “O()” notation to highlight the main term in a complicated expression for the “complex” attack. Of course, we can make the comparison more explicit, but we politely ask the reviewer to please carefully reread our text, page 7, where everything is laid out (even using displayed equations for the complex case).
+
+
+It is common in distributed environments to share keys across devices. Think of TLS private keys in a distributed server setting. Your review itself makes this comparison later (in its last paragraph). We do not try to prove security in S1. The fact that our security model has “independent key generation” says nothing about whether that key ends up in a single HLL instance or in multiple instances (but our analysis for S2-S4 only applies to the single instance case).
+
+
+Lemma 1: yes, 2^m should be m = 2^n, this is an unfortunate typo.
+
+
+We will add the number of resets to Table 2. Unfortunately, Reviriego and Ting [6] are not precise about which implementation of HLL they used. See the last paragraph of Section 6, where we discuss this in detail.
+
+
+Yes, various network switches could be equipped with same key. Of course, getting the key from one device then compromises the security of all the others. So there are scenarios where being able to merge under different keys would be nice.
+
+
+Reviewer B:
+
+
+In the port-scanning application, the attacker could exploit flexibility in other fields in the IP header, e.g. the 16-bit IPID field. Whether this would work would depend on what IP header fields exactly are fed into the HLL hash. Alternatively, with our S2 attack, the attacker could scan roughly half the ports whilst keeping the cardinality estimate below mlog2 = 0.693m.
+
+
+We will investigate whether something weaker than a PRF would suffice - indeed a pairwise independent hash (with an key unknown to the attacker) may be enough - thanks!
+
+
+We believe there is value in the generality of our analysis (simply put, provided there is enough flexibility in the input, an attacker can make the HLL severely underestimate the input cardinality). But we will make the connection between our analysis and its effect on specific security mechanisms mentioned in the introduction clearer. 
+
+
+Reviewer C:
+
+
+We will add a simplified description of HLL in Section 2 by expanding the description of the “single bucket” version. In Figure 1, “m” does indeed occur multiple times, but has the same meaning everywhere and always m = 2^n with n in [4,16].
+
+
+Reviewer D:
+
+
+We tried to present our attacks in a generic way - the attacker has a set X of strings from which he can select and wants to insert as much of X as possible into the HLL - rather than tying them to a specific setting. We can work to make the connections back to specific settings clearer. The introduction cites 3 documented scenarios - estimation of Facebook user statistics, DoS attack detection, network flow estimation. In all 3 cases, our attacks would lead to undercounting, with various real-world consequences, e.g. missing DoS attacks or wrongly optimised routing protocols. 
+
+
+We will improve the description of HLL itself - see response to Reviewer C.
+
+
+The attacks all work identically if SHA is used in place of a non-cryptographic hash function. All that is needed is that the hash maps the inputs to roughly uniform outputs. The adversary does not need to “force” exact outputs and we did not use any specific weakness in Murmur in the attacks (only its “strength” in providing roughly uniform outputs).
+
+
+The attacks no longer work if a PRF is used (which is what we assume the referee means by “MAC”). Indeed, we prove security in this case for S2-S4, provided the adversary does not know the PRF key. If it does know the key, the attacks work exactly as before.
+
+
+Reviewer E:
+
+
+The attacks are not sensitive at all to the form of the inputs - all that is needed is that the hash function h, acting on those inputs, should have approximately uniform outputs. So 4-character ACSII is just as good as, say, IP packet headers, for experimental evaluation. 
+
+
+We agree that having a target HLL with no honest inputs is idealised. Section 4.2 provides attacks in the setting where there are honest inputs. For example, in S2, assuming the HLL is at least lightly loaded, an attacker can insert about half of all items without increasing the cardinality estimate at all, and can do even better in S4. We can add experiments that confirm this analysis. 
+
+
+<end>
+967 words.
+
+
+TODO:
+
+
+fix margin size
+Missing reference in Section 5: "In S4, the analysis is the same as in Section ."
+Probable typo in Section 6: "only, thus that are initially empty." Probably should be "thus they are".
+Better HLL description (by adding a simplified version?)
+
+
+REVIEWS QUESTIONS:
+
+
+* Wouldn't a more reasonable set of adversarial models be "insertion of items + m known + (maybe) get cardinality estimate + (maybe) get  snapshot"? 
+   * If we assume that the knowledge of the adv is limited to m and can only insert items, then because of the Hit Counting phase, no attack can be done on crafting/picking items. The only thing that comes to my mind is a probabilistic attack where the adversary limits itself to x(m) items hoping to fall under a certain cardinality estimate.
+   * When adding cardinality estimate, we obtain an elevated S1 where an adversary could filter items not based on the effect of the insertion on the shadow device but on the target itself. 
+   * When adding snapshot, one can compute the cardinality estimate by itself and partially recreate the map of the (even keyed) h: x -> {0, 1}^n so can end up in S4 with some computational work.
+
+
+* Are there really deployments of HLL in adversarial settings that don't key $h$?
+   * The original implementation does not mention any key, and many implementations do not allow to input a key. If the user is not aware of that and use those libraries, then yes they would deploy something key-less.
+   * https://github.com/svpcom/hyperloglog; https://prestodb.io/docs/current/functions/hyperloglog.html; https://github.com/prestodb/presto/blob/6ff3052e9df1a04613157746e7e779fd54c0c2a1/presto-tests/src/main/java/com/facebook/presto/tests/CreateHll.java
+   * Add a link for Redis - same, has no key: https://github.com/redis/redis/blob/efaf09ee4b6437c69c467acdb0c62a510207e993/src/hyperloglog.c#L466 Seed is hardcoded ? Could you please check because I am not sure at all.
+   * Yep, it’s a hardcoded seed.
+
+
+* Why would a shadow device have the same _cryptographic keys_ as a real device?
+   * Quite common to have multiple webserver machines or TLS terminators (for load balancing) sharing certificate private keys
+   * Also inherited from Riviregio and Ting
+
+
+* Why would resets of a shadow device the attacker controls be  costly? Constant comparison.
+   * Resets could be costly depending on the application. For the facebook application, a reset occurs only every day so you don’t want to wait that long. It might also be the case that you pay at each reset (if you have a network monitoring device) so the less resets = the less bills.
+   * Constants comparison would be nice indeed…
+   * Number of resets should be reported in table 2
+
+
+
+
+* And the results of applying their method to the same implementation of HLL you used as well?
+   * 
+
+* Analysis of whether a weaker hash assumption could be used.  (Or analysis of further variations of HLL, if they are needed to make a concrete attack example.)
+* Analysis about whether something less than a PRF would work, analogous to pairwise-independent hashing for hash tables.
+* Unify the use of $m$
+   * it is and represents the number of registers.
+
+
+* SHA instead of Murmur?
+   * Murmur is designed to be fast, yet remain fairly unique to avoid collisions. Going for SHA-256 would increase the insertion time on the server side, which is not desired when handling big streams.
+   * 25 cycles/byte for SHA 256 vs 1 cycle/byte for Murmur3
+
+
+* A keyed hash is described but if it is computationally difficult to produce a value that leads to a certain element being inserted into the sketch how does this affect the attack?
+   * If it is computationally difficult, it means that the attack takes more time.
+
+
+* While there is no secret, it may still be difficult for the adversary to insert values of their choice.
+   * Insertion should be one API call or one user action (log in to Facebook for example). It does not make much sense that it should be difficult.
+   * Values are found via brute force, so it cannot be difficult?
+
+
+* Can you describe the difference between use of a non-cryptographic hash like Murmur3, a cryptographic hash and a MAC?
+   * They all have different goals. Non cryptographic hash aims for speed while the crypto alternatives aims for security. MAC on the other hand aim for unforgeability.
+   * This is why in the context of HLL applications, non-cryptographic hashes are often picked as they are extremely fast and “unique enough” as we expect collisions to happen anyway for big tables.
+
+
+* Empirical results: could do again with another set of inputs (the set of 4-character ASCII strings, or a set of 250K random strings)
+   * Totally 
+
+
+* Realistic to consider a scenario where attack a target with no honest inputs already in the sketch?
+   * Yes, example of network monitoring
+
+
+* Map scenarios to real life examples. For ex, ZMap or nmap that successfully evades detection against a defender using Redis for log analysis
+
+
+
+
+
+
+Original reviews (A, B, C, D, E with scores 1, 5, 4, 2, 5 resp.)
+
+
+Review #186A
+===========================================================================
+
+
+Review recommendation
+---------------------
+1. Reject
+
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+
+Overall merit
+-------------
+1. Bottom 50% of submitted papers
+
+
+Writing quality
+---------------
+4. Well-written
+
+
+Paper summary
+-------------
+This paper describes a family of attacks against the well-known
+cardinality estimator HyperLogLog (HLL) that allow an adversary who
+knows the hash function used in the HLL deployment to insert a large
+number of items into the sketch, while having HLL report only a small
+value.
+
+
+Strengths
+---------
++ The paper is quite well written; thanks for that!  It appears to use
+  the wrong margin size, though?
+
+
++ The formal security modelling in Section 7 is a good exercise to
+  actually do, though the answer it quickly comes to (key the hash
+  function to get a PRF) is indeed the answer that one would immediately
+  expect.
+
+
++ SipHash is a good choice for the PRF.
+
+
+Weaknesses
+----------
+- The assumption in S2, S3, S4 that the adversary knows $h$ makes HLL
+  obviously unsound, since HLL fundamentally relies on incoming items
+  being put into random buckets (and, though you do not use this fact in
+  this paper, having geometrically distributed numbers of 0s starting at
+  bit n).  I don't see that observing this is a research contribution.
+  Similarly in S1, the adversary doesn't have $h$, but _does_ have a
+  black box that implements $h$ and pretty easily returns the result.
+  Wouldn't a more reasonable set of adversarial models be "insertion of
+  items + m known + (maybe) get cardinality estimate + (maybe) get
+  snapshot"?  Are there really deployments of HLL in adversarial
+  settings that don't key $h$?  (You indicate in Section 6 that there
+  are a number of implementations with a fixed $h$, so if they're indeed
+  used in adversarial situations, that's for sure a bug report, but not
+  a research contribution.)
+
+
+- The optimizations in the "complex attack" paragraphs of Section 4.1.2
+  are based on the assumption that "We will seek to minimise the number
+  of resets performed in our attack, since we assume these are costly."
+  (p.6) Why would resets of a shadow device the attacker controls be
+  costly?  What is your cost model here?  Even with your optimizations,
+  you come to a total number of insertions that you cite as
+  "$O(2^{2t})$" (p.7).  But the "simple attack" you presented previously
+  also has $O(2^{2t})$ insertions, so if you're claiming a difference,
+  the constants are what matter, and you don't directly compare the
+  constants in your two attacks in this section.
+
+
+- Why would a shadow device have the same _cryptographic keys_ as a real
+  device?  What kind of deployment scenario are you envisioning here?
+  In your security model, you even explicitly say that the key is chosen
+  at runtime during the init call (for settings S2, S3, and S4), so why
+  should setting S1 be different?
+
+
+Comments for author
+-------------------
+In Lemma 1, you say "$B$ out of $2^m$ buckets".  But there are only $m$
+buckets, right?
+
+
+At the end of Section 6, you say that your method has a higher reduction
+to the cardinality estimate than that of Reviriego and Ting [6], but
+at the cost of more resets.  Shouldn't the number of resets then be
+reported in Table 2?  And the results of applying their method to the
+same implementation of HLL you used as well?
+
+
+In Section 7.5, "This mean that" -> "This means that"
+
+
+Also in Section 7.5, you correctly point out that instantiating HLL with
+keyed hashed with different keys make them no longer mergeable.  Would
+it be difficult to arrange for the various, say, network switches run by
+the same entity (that want to merge their counts) use the same keys?
+Having multiple webserver machines or TLS terminators (for load
+balancing) sharing certificate private keys is quite common; what is
+different about this deployment scenario?
+
+
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+
+
+Review #186B
+===========================================================================
+
+
+Review recommendation
+---------------------
+5. Accept
+
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+
+Overall merit
+-------------
+3. Top 25% but not top 10% of submitted papers
+
+
+Writing quality
+---------------
+4. Well-written
+
+
+Paper summary
+-------------
+This paper presents several attacks on the HyperLogLog unique item sketch algorithm.  This algorithm is used to estimate unique item counts in several widely-used database and networking products.  Previous work had shown that an attacker can cause the algorithm to underestimate the number of unique items seen by a factor of five; this work shows that an attacker that knows the parameters of the algorithm (hash function, number of buckets, number of bits) can essentially insert an unbounded number of items into a stream without appreciably increasing the count, at the cost of rejecting about half of the items sampled.  Several variants of the attack are investigated theoretically and empirically, and a simple countermeasure - using a PRF instead of a hash function - is shown to provably eliminate attacks, although this countermeasure does rule out the useful property of being able to merge distributed HLL sketches.
+
+
+Strengths
+---------
++ Well-written paper
+
+
++ Establishes a useful adversary model for investigating security of HLL schemes
+
+
++ Exponentially improves the performance of previous attacks
+
+
++ Includes both empirical and theoretical evaluation of attacks
+
+
++ Gives a simple and easy-to-analyze countermeasure
+
+
+Weaknesses
+----------
+- The implications of the attacks are a little unclear: e.g. one example is evading port-scan detection, but if I can only scan some ports, doesn't that defeat the purpose?
+
+
+- The attacks and defense are both a little obvious: basically, insert only items that won't advance the counter in a bucket, and use a keyed hash.  It would be nice to see some analysis about whether something less than a PRF would work, analogous to pairwise-independent hashing for hash tables.
+
+
+Comments for author
+-------------------
+This is a quite nice paper, and I really don't have much to say beyond the bullet points above.  Basically, the only things that I would like to see improved in the paper is a better connection from the actual attacks back to the motivating examples - e.g., show us how some specific security mechanism can fail due to this attack - and maybe some analysis of whether a weaker hash assumption could be used.  (Or analysis of further variations of HLL, if they are needed to make a concrete attack example.)
+
+
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+
+
+Review #186C
+===========================================================================
+
+
+Review recommendation
+---------------------
+4. Minor revision
+
+
+Reviewer expertise
+------------------
+1. No familiarity
+
+
+Overall merit
+-------------
+4. Top 10% but not top 5% of submitted papers
+
+
+Writing quality
+---------------
+4. Well-written
+
+
+Paper summary
+-------------
+The paper shows that the HyperLogLog algorithm, which is used as a cardinality estimation algorithm for very large data sets, as described in the literature is vulnerable to adversarial attacks. As a countermeasure, the authors propose to use a secret hashing function (a keyed PRF) instead of the public hashing function, and prove the security of this construction.
+
+
+Strengths
+---------
+- Novel attack scenarios against an important Big Data algorithm
+- Provably secure solution, based on a convincing observation
+- Both formal and empirical security analysis
+
+
+Weaknesses
+----------
+- HLL algorithm description a bit sketchy
+- Formal model needs refinement
+
+
+Comments for author
+-------------------
+This paper presents a very interesting security problem, and a convincing solution. The presentation however could benefit from a number of clarifications:
+- A section 2.1a 'Simplified HLL' which describes a simplified version of the HLL algorithm would help in understanding the full algorithm. It may also be used as an abstraction for your proofs in 7.4 and the appendix, since you do not go into the details of HLL there.
+- In Fig. 1, the variable m is used for different purposes.
+(1) $m=2^n$ Perhaps it would be clearer to use the notation $m_n$ since there seem to be 13 different values of m.
+(2) $m$ registers
+(3) Which value $m$ is meant in the computation of $E$?
+
+
+Requested Changes
+-----------------
+Clarifications to the questions above.
+
+
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+
+
+Review #186D
+===========================================================================
+
+
+Review recommendation
+---------------------
+2. Reject and resubmit
+
+
+Reviewer expertise
+------------------
+1. No familiarity
+
+
+Overall merit
+-------------
+2. Top 50% but not top 25% of submitted papers
+
+
+Writing quality
+---------------
+2. Needs improvement
+
+
+Paper summary
+-------------
+The authors present an attack on they HLL algorithm used to efficiently and probabilistically estimate the cardinality of a large set of values by sampling values from the set.  They show that by manipulating the sample set, they can cause HLL to under-estimate the cardinality.
+
+
+Strengths
+---------
+The attack is simple and would likely work.
+
+
+Weaknesses
+----------
+Once the mechanism behind HLL is described, the attack is mostly straight forward.  However, it is also fairly easy to stop as a keyed hash makes it difficult for the adversary to mount the attack.  The writing is fairly abstract and it is hard to see how practical this attack is in practice.
+
+
+Comments for author
+-------------------
+It would be good to start with a solid motivating scenario that describes end-to-end how an adversary would use this exploit to cause a large amount of damage or harm to the victim.  I also feel the writing could be improved.  The description of HLL itself, as well as the attack, were difficult to follow at times, and the different attack scenarios felt contrived and it was difficult to map them to real-life scenarios. 
+
+
+I was also curious as to how the attack works if a cryptographic (but non-keyed) hash like SHA were used instead of Murmur.  A keyed hash is described but if it is computationally difficult to produce a value that leads to a certain element being inserted into the sketch how does this affect the attack?  While there is no secret, it may still be difficult for the adversary to insert values of their choice.
+
+
+Requested Changes
+-----------------
+Please improve the descriptions of HLL and your attack.
+
+
+Questions for authors' response
+-------------------------------
+Can you describe the difference between use of a non-cryptographic hash like Murmur3, a cryptographic hash and a MAC?
+
+
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+
+
+Review #186E
+===========================================================================
+
+
+Review recommendation
+---------------------
+5. Accept
+
+
+Reviewer expertise
+------------------
+2. Some familiarity
+
+
+Overall merit
+-------------
+5. Top 5% of submitted papers!
+
+
+Writing quality
+---------------
+4. Well-written
+
+
+Paper summary
+-------------
+HyperLogLog (HLL) is an algorithm for efficiently estimating the cardinality of sets. HLL is useful for, among many other applications, detecting anomalies in data sets such as network logs, application event logs, and so on. If an attacker could cause the algorithm to significantly underestimate the cardinality, important information about the set (such as data anomalies) would go undetected.
+
+
+The paper presents, proves, and analyzes a practical attack that induces significant underestimation, improving on previous work.
+
+
+Strengths
+---------
+Solid theoretical foundation combined with solid empirical results on a real, meaningful target (Redis with modern HLL).
+
+
+Results are significant — attack induces a large underestimate in cardinality.
+
+
+Weaknesses
+----------
+The empirical results described in Section 6, while promising, are not necessarily something a real-world attacker could meaningfully use (the set of 4-character ASCII strings, or a set of 250K random strings). Similarly, a real-world attacker is unlikely to be lucky enough to get to attack a target with no honest inputs already in the sketch. Those model scenarios might or might not faithfully model a real attack like suggested in section 3 (e.g. a port scanner that evades detection).
+
+
+Comments for author
+-------------------
+It entirely depends on your audience, but as an industry schlub I find pseudocode notation easier to understand than mathematical notation. I understand the good reasons for using math notation. I'll be excited to see the source code when you can release it!
+
+
+I would love to see future work that operationalizes the attack. For example, a modification to ZMap or nmap that successfully evades detection against a defender using Redis for log analysis would be an excellent paper to present at USENIX WOOT or another similar conference.
+
+
+Requested Changes
+-----------------
+No significant changes.
+
+
+Missing reference in Section 5: "In S4, the analysis is the same as in Section ."
+
+
+Probable typo in Section 6: "only, thus that are initially empty." Probably should be "thus they are".
