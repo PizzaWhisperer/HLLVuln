@@ -251,7 +251,7 @@ By construction and from Lemma~\ref{lem:bound}, we are guaranteed that the cardi
 The simplistic version of our attack uses the above idea, inserting items $x$ into the shadow HLL sketch but resetting it as soon as the cardinality estimate increases from $B$ to $B+1$ (indicating that a non-target bucket has been hit by item $x$). Acting in this way precisely determines whether each inserted item hits the target buckets or not, so has no ``false positives'' which need to be eliminated through reprocessing of the list ${\cal L}$. This means that the attack can be carried out in a streaming fashion in a single pass over ${\cal X}$. Assuming $h$ behaves like a random function, we must perform a reset with probability $\frac{m-B}{m} = 1 - \frac{B}{m}$ per item inserted, and hence in total an expected number of $(1 - \frac{B}{m})\cdot 2^t$ resets.
 
 \paragraph{Complex Attack:}
-The more complex version of the attack only resets the shadow HLL sketch when its cardinality estimate reaches a value indicating that $B_{\max}$ buckets have been hit (recall this number can be determined precisely because of the use of the Hit Counting algorithm for cardinality estimation). Hence, less resets should be required. However, when the number of active buckets has reached some value $B^\prime \leq B_{\max}$ this means that an item $x$ may not increase the cardinality estimate, yet still not hit one of the $B$ target buckets (instead it hits one of the other $B^\prime - B$ active buckets). Such an $x$ acts as a ``false positive" and needs to be eliminated through reprocessing of the list ${\cal L}$.
+The more complex version of the attack only resets the shadow HLL sketch when its cardinality estimate reaches a value indicating that $B_{\max}$ buckets have been hit (recall this number can be determined precisely because of the use of the Hit Counting algorithm for cardinality estimation). Hence, fewer resets should be required. However, when the number of active buckets has reached some value $B^\prime \leq B_{\max}$ this means that an item $x$ may not increase the cardinality estimate, yet still not hit one of the $B$ target buckets (instead it hits one of the other $B^\prime - B$ active buckets). Such an $x$ acts as a ``false positive" and needs to be eliminated through reprocessing of the list ${\cal L}$.
 
 \paragraph{Analysis of the Complex Attack:}
 %Suppose that after each reset, the order of the items in ${\cal X}$ (or ${\cal L}$) that have not yet been processed on the current pass is randomised. (Here we exclude the special items  $x_1,\ldots, x_B$ from the reordering.) Then 
@@ -400,7 +400,7 @@ In scenarios S2 and S4 with an initially non-empty HLL sketch, we assume as for 
 \[
 \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell}.
 \]
-Now we can proceed exactly as in Sections~\ref{sec:nonemptyHLLS2} and~~\ref{sec:nonemptyHLLS4}, inserting values $x$ whose hashes have rightmost $\ell$ bits beginning with a ``1'' bit (and with a more relaxed condition in S4). These insertions do not alter the values of the $C_k$, and hence $\hat{\lambda}$ is unaffected. In S2, we expect to insert half the items in ${\cal X}$ without increasing the cardinality estimate $\hat{\lambda}$ at all. In S4, the analysis is the same as in Section~\label{sec:nonemptyHLLS4}.
+Now we can proceed exactly as in Sections~\ref{sec:nonemptyHLLS2} and~~\ref{sec:nonemptyHLLS4}, inserting values $x$ whose hashes have rightmost $\ell$ bits beginning with a ``1'' bit (and with a more relaxed condition in S4). These insertions do not alter the values of the $C_k$, and hence $\hat{\lambda}$ is unaffected. In S2, we expect to insert half the items in ${\cal X}$ without increasing the cardinality estimate $\hat{\lambda}$ at all. In S4, the analysis is the same as in Section~\ref{sec:nonemptyHLLS4}.
 
 This completes our analysis of Redis. The key takeaway is that, in scenarios S2 and S4, an adversary can expect to insert a constant fraction of ${\cal X}$ into a non-empty Redis HLL sketch whilst not increasing its cardinality estimate at all (and whilst keeping the estimated cardinality linear in $m$ in the case where the sketch is initially empty).
 
@@ -528,7 +528,7 @@ It does not matter that ${\cal A}$ can adaptively choose its inputs $x$ in \text
 
 \subsection{Instantiating the PRF}
 
-The above construction requires a PRF $F: \{0,1\}^k \times {\cal D} \rightarrow  \{0,1\}^{n+\ell}$. Here, the set ${\cal D}$ represents the space of possible inputs to HLL which can be modelled by a set of bit-strings of some maximum length. This mean that $F$ needs to be Variable Input Length PRF (VIL-PRF). 
+The above construction requires a PRF $F: \{0,1\}^k \times {\cal D} \rightarrow  \{0,1\}^{n+\ell}$. Here, the set ${\cal D}$ represents the space of possible inputs to HLL which can be modelled by a set of bit-strings of some maximum length. This means that $F$ needs to be Variable Input Length PRF (VIL-PRF). 
 
 We want $F$ to be competitive with non-cryptographic hashing on small input sizes, as typical in current HLL implementations and applications (e.g.\ MurmurHash3 applied to an IP header). This makes off-the-shelf approaches like HMAC uncompetitive, since even for the shortest inputs, HMAC would require 4 evaluations of the underlying hash compression function.
 
