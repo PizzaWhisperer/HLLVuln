@@ -1,6 +1,8 @@
 \newif\ifacmversion % turn on ACM style (can be short or full)
 \acmversiontrue
 
+\newif\ifanon % turn on ACM style (can be short or full)
+\anontrue
 
 \ifacmversion
 
@@ -531,7 +533,7 @@ In summary, we cannot hope to gain any security in scenario S1 by adding more cr
 
 \subsection{Intuition for Formal Security Analysis for S2, S3, S4}
 
-For scenarios S2, S3 and S4, the picture is much more positive. In the remainder of this section, we introduce a formal security model covering all three scenarios. We work with a simulation-based framework. This is in contrast to the game-based approach introduced for probabilistic data structures in~\cite{CCS:ClaPatShrPS19}. We discuss the strengths of our alternative approach in more detail below. 
+For scenarios S2, S3 and S4, the picture is much more positive. In the remainder of this section, we introduce a formal security model covering all three scenarios. We work with a simulation-based framework, in contrast to the game-based approach introduced for probabilistic data structures in~\cite{CCS:ClaPatShrPS19}. %We discuss the strengths of our alternative approach in more detail below. 
 
 We first begin by explaining the high-level idea of our approach. We allow an adversary ${\mathcal{A}}$ to interact with an HLL via various oracles that capture its capabilities in each of the three scenarios S2, S3 and S4: it may have an \texttt{insert($\cdot$)} oracle allowing it to add values to the HLL, a \texttt{read} oracle that returns the HLL cardinality estimate, and a \texttt{corrupt} that returns all the HLL bucket contents (but not any secret key $K$); in S4 it has all three oracles. In addition, ${\mathcal{A}}$ always has access to an \texttt{init($\cdot$)} oracle by which it receives the HLL parameters $n$, $\ell$, $\alpha_n$ needed to initialise the HLL sketch.
 
@@ -551,6 +553,7 @@ We consider adversary ${\mathcal{A}}$ to be an algorithm running in a security g
 \mbox{Adv}^{\mbox{\tiny S$i$-RoI}}_{\mbox{\tiny HLL}}({\mathcal{A}}) := \lvert 2\Pr[b' = b] - 1 \rvert \, .
 \]
 %Using a standard transformation, this probability can be rewritten as $\lvert \Pr[b' = 1| b = 1] - \Pr[b'=0|b=1] \rvert$. 
+
 The four oracles that  ${\mathcal{A}}$ can interact with behave as follows in the real world:
 \begin{itemize}
 \item \texttt{init($\cdot$)}: this oracle receives as input the HLL parameters ($n$, $\ell$, $\alpha_n$) and performs initialisation of the HLL sketch. It also selects a key $K \leftarrow_{\$} \{0,1\}^k$ for keyed function $F: \{0,1\}^k \times {{\mathcal{D}}} \rightarrow  \{0,1\}^{n+\ell}$. This oracle is available in all of S2, S3, S4, but can only be called once as ${\mathcal{A}}$'s first oracle query.
@@ -561,7 +564,7 @@ The four oracles that  ${\mathcal{A}}$ can interact with behave as follows in th
 
 We note that in S4 (and only in S4) the adversary has access to all four oracles. This makes it the strongest model, and hereafter we only target security in this model. We count queries $q$ to \texttt{insert($\cdot$)} because this will enable us to quantify the quality of our security reduction to PRF security below.
 
-In many simulation-based security proofs, the simulator ${\mathcal{S}}$ depends on ${\mathcal{A}}$, and security is quantified via a statement of the form ``For all adversaries ${\mathcal{A}}$, there exists a simulator ${\mathcal{S}}$ such that $\ldots$'' with ${\mathcal{S}}$ being described in the proof. In our analysis we are able to provide a universal simulator, enabling us to make a stronger statement of the form ``There exists a simulator ${\mathcal{S}}$ such that, for all adversaries ${\mathcal{A}}\ldots$''. We describe this simulator now, in terms of how it handles  ${\mathcal{A}}$'s oracle queries in the ideal world:
+In many simulation-based security proofs, the simulator ${\mathcal{S}}$ depends on ${\mathcal{A}}$, and security is quantified via a statement of the form ``For all adversaries ${\mathcal{A}}$, there exists a simulator ${\mathcal{S}}$ such that $\ldots$'' with ${\mathcal{S}}$ being described in the proof of a specific scheme. In our analysis we are able to provide a universal simulator, enabling us to make a stronger statement of the form ``There exists a simulator ${\mathcal{S}}$ such that, for all adversaries ${\mathcal{A}}\ldots$''. We describe this simulator now, in terms of how it handles  ${\mathcal{A}}$'s oracle queries in the ideal world:
 
 \begin{itemize}
 \item \texttt{init($\cdot$)}: on input $n$, $\ell$, $\alpha_m$, ${\mathcal{S}}$ initialises an HLL sketch as in Figure~\ref{fig:hll}; that is, it creates an array of $m=2^n$ buckets $M[j]$ and initialises them all to 0.
@@ -579,7 +582,7 @@ Here, we assume without loss of generality that all of ${{\mathcal{B}}}$'s queri
 Now we are ready to state our main result:
 
 \begin{theorem}\label{thm:security-of-HLL-with-PRF}
-Suppose ${\mathcal{A}}$ is an S4 adversary against HLL instantiated with a keyed function $F: \{0,1\}^k \times {{\mathcal{D}}} \rightarrow  \{0,1\}^{n+\ell}$. Then we can construct from ${\mathcal{A}}$ a PRF adversary ${{\mathcal{B}}}$ against $F$ such that:
+Let simulator $\mathcal{S}$ be as described above. Suppose ${\mathcal{A}}$ is any S4 adversary against HLL instantiated with a keyed function $F: \{0,1\}^k \times {{\mathcal{D}}} \rightarrow  \{0,1\}^{n+\ell}$. Suppose ${\mathcal{A}}$ either plays in the real world or in the ideal world with $\mathcal{S}$. Then we can construct from ${\mathcal{A}}$ a PRF adversary ${{\mathcal{B}}}$ against $F$ such that:
 \[
  \mbox{Adv}^{\mbox{\tiny PRF}}_{F}({{\mathcal{B}}}) = \mbox{Adv}^{\mbox{\tiny S4-RoI}}_{\mbox{\tiny HLL}}({\mathcal{A}}) \,.
 \]
@@ -601,23 +604,29 @@ When ${\mathcal{A}}$ outputs a bit $b'$, ${{\mathcal{B}}}$ outputs its own bit $
 
 We reiterate our central point: the theorem shows that no efficient S4 adversary ${\mathcal{A}}$ can tell that it is playing against our simulator ${\mathcal{S}}$ using truly random values $y$ instead of with values obtained from a PRF, except with a small advantage. This means that ${\mathcal{A}}$ is effectively reduced to attacking HLL in the exact same setting used in the average case analysis of HLL from~\cite{hll}, wherein it is proved that the HLL cardinality estimate endures relative errors of the form $1.04/\sqrt{m}$. From this we can conclude that no efficient S4 adversary ${\mathcal{A}}$ can manipulate the HLL cardinality estimate to its benefit.
 
+Note that our security analysis using a simulation-based definition does not require us to specify a winning condition for the adversary. Rather, we infer from inspecting the simulator what the adversary can (or cannot) achieve in the ideal world, and show that no efficient adversary can distinguish the real and ideal worlds. This stands in contrast to the game-based approach of~\cite{CCS:ClaPatShrPS19} which needs a complex definition to say when the adversary has successfully manipulated a probabilistic data structure. This reveals a strength of the simulation-based approach in more complex settings like ours.
+
 \subsection{On Confidentiality}
-We also recall that our ${\mathcal{S}}$ ignores ${\mathcal{A}}$'s inputs $x$ in handling \texttt{insert($\cdot$)} queries. In traditional simulation-based security notions, this would imply that the ``leakage'' given to the simulator does not include the input values $x$, and one would then conclude by analogy to, say, semantic security for encryption that the HLL implemented using a PRF offers confidentiality for the inputs $x$. This is not quite correct here, since ${\mathcal{A}}$ chooses all the inputs $x$ and so ``knows'' them already. To address confidentiality, one would need instead to consider $x$ that are drawn from some distribution on $\mathcal{D}$ or consider two-stage adversaries that ``forget'' the $x$ values chosen in its first stage by not passing state to its second stage. 
 
-Even here, however, an HLL can leak information about values $x$ that were previously inserted. Consider the following attack from~\cite{cardestprivacy}: to test whether a value $x$ was previously inserted into the HLL, make the sequence of queries: \texttt{read}, \texttt{insert($x$)}, \texttt{read}. If the two cardinality estimates are different, one can conclude definitively that $x$ was \emph{not} previously inserted into the HLL; if they are the same, one can estimate (with some error) that $x$ was previously inserted. This attack still works even if HLL is implemented using a PRF and is unavoidable in view of the oracle queries (and in real settings, the API) available to the adversary. So such privacy leaks are an inherent feature of HLL if a suitably rich API is provided. Note that this attack does not contradict our main result, which concerns prevention of cardinality manipulation rather than confidentiality. 
+An HLL can leak information about values $x$ that were previously inserted. Consider the following attack from~\cite{cardestprivacy}: to test whether a value $x$ was previously inserted into the HLL by an honest user (say), the adversary makes the sequence of queries: \texttt{read}, \texttt{insert($x$)}, \texttt{read}. If the two cardinality estimates are different, the adversary can conclude definitively that $x$ was \emph{not} previously inserted into the HLL; if they are the same, it can estimate (with some error) that $x$ was previously inserted.\footnote{Errors can arise in two ways when $x$ was not previously inserted: either inserting $x$ changes a bucket value, but the change is masked by rounding when the cardinality estimate is computed, or inserting $x$ does lead to a change in a bucket value because $\rho(w)$ computed from $x$ is too small.} This attack still works even if HLL is implemented using a PRF and is unavoidable in view of the oracle queries (and in real settings, the API) available to the adversary. So such privacy leaks are an inherent feature of HLL if a suitably rich API is provided. Note that this attack does not contradict our main result, which concerns prevention of cardinality manipulation rather than confidentiality. 
 
-More positively, what we can say is that our simulation-based security definition does imply confidentiality of inputs in the  case of a model where an honest party makes a sequence of insertions and where ${\mathcal{A}}$ is then limited to \texttt{read} and \texttt{corrupt} queries. \todo[inline]{explain why.}
+Still, simulation-based security notions are often used to model confidentiality properties, so it is tempting to think that our security definition might say something about confidentiality of the HLL inputs $x$. Our existing model does not, since ${\mathcal{A}}$ chooses all the inputs $x$ and so ``knows'' them already. However, it is easily modified to provide a confidentiality notion. For example, we can consider the insertion of honestly generated values $x$ that are drawn from some probability distribution $p$ on $\mathcal{D}$ in a first phase, with ${\mathcal{A}}$ then having access to only \texttt{read} and \texttt{corrupt} oracles in a second phase (we have to remove the \texttt{insert($\cdot$)} oracle in view of the general attack from~\cite{cardestprivacy}). 
 
-We leave the further exploration of how to adapt our simulation-based security definitions to capture confidentiality notions to future work.
+In this case, the simulator ${\mathcal{S}}$ in the ideal world can proceed without ever seeing any inputs but instead knowing only the distribution $p$ and the number of distinct samples drawn from it in the first phase. It is not hard to modify the proof of Theorem~\ref{thm:security-of-HLL-with-PRF} to show that no adversary can distinguish real and ideal worlds in this case (up to PRF security). Now, since ${\mathcal{S}}$ has no access to inputs $x$, we can conclude that the HLL implemented using a PRF ensures confidentiality for the inputs $x$. Thus, the cardinality estimates and even the bucket values themselves do not leak information about the honestly inserted values $x$ (beyond their number). 
 
+We leave the further exploration of how to adapt our simulation-based security definitions to capture confidentiality notions to future work. 
 
+\subsection{Is a PRF Required?}
 
-%It does not matter that ${\mathcal{A}}$ can adaptively choose its inputs $x$ in \texttt{insert($\cdot$)} queries, nor that it can access \texttt{read} and \texttt{corrupt} queries. For each \texttt{insert($\cdot$)} query, a fresh value $x$ leads to a new random $y$ being generated and used to update a bucket, as in the average case analysis of HLL. The \texttt{read} and \texttt{corrupt} queries do leak information about $F$'s outputs to the adversary, but such outputs are indistinguishable from random under the assumption that $F$ is a PRF. 
+It is natural to wonder whether a PRF is really required in place of hash function $h$ in order to make HLL secure, or whether a weaker cryptographic primitive would suffice. For example, perhaps using a keyed universal hash function (UHF) $h_K(\cdot)$ would be sufficient.
 
-\todo{explain why a sim-based approach is better, more general, does not require a specific winning condition.}
+In general, UHFs do not preserve confidentiality of their keys: the key may be recovered from a small number of UHF outputs. Consider, for example, the UHF built from polynomial hashing over a finite field $\mathcal{F}$. Here, inputs $x$ are encoded as polynomials  $p_x \in \mathcal{F}(X)$, the key is a uniformly random field element, and the UHF output $h_K(x)$  is equal to $p_x(K)$, obtained by polynomial evaluation at $K$. It is well-known that an adversary who knows the input $x$ can determine the key $K$ by finding roots of polynomials over $\mathcal{F}$, using Berlekamp's algorithm~\cite{Berlekamp}. If the adversary can choose $x$, then it can make the polynomials $p_x$ have low degree, including of degree 1, making the attack easier to perform. 
 
-\todo{Why UHFs don't work in general so why we need a PRF -- key recovery is possible in S4; partial info about processed values and therefore keys  leaks from Card Est in S2, though harder to make an attack from this. }
+Now consider using such a UHF in place of $h$ in attack scenario S4. For concreteness, we assume $\mathcal{F}$ equals $\textsf{GF}(2^{128})$, so our UHF has 128-bit keys and 128-bit outputs. The output is then truncated to provide the 32 bits needed by HLL (or, say, the 64 bits consumed by the Redis variant of HLL). In S4 an adversary $\mathcal{A}$ can perform a series of pairs of \texttt{insert($x_i$)} and \texttt{corrupt} queries on chosen values $x_1, x_2, \ldots$. With high probability, each  \texttt{insert} query touches a fresh bucket in the HLL sketch. Then each \texttt{corrupt} query reveals to $\mathcal{A}$ which bucket was touched by the preceding \texttt{insert} query. In turn, this leaks partial information about the corresponding UHF output $p_{x_i}(K)$. 
 
+Going further, the S4 adversary has complete control over the values $x_i$, so it can choose them so that the polynomials $p_{x_i}$ are of degree 1 over $\textsf{GF}(2^{128})$. Then $K$ can be determined by writing everything bit-wise and solving a linear system. The idea is that, when $x_i$ has 128 bits, we can write $h_K(x_i) = p_{x_i}(K) = x_i \cdot K$ where the multiplication is over $\textsf{GF}(2^{128})$ (and we turn bit-strings into field elements in a standard way). Then each bit of $h_K(x_i)$ is a linear combination of the bits of $K$, with the coefficients being determined by the known bits of $x_i$ and the degree 128 irreducible polynomial $f$ over $\textsf{GF}(2)$ that determines how field multiplication works at the bit level. 
+ 
+The above attack exploits specific properties of the chosen UHF, but demonstrates that UHFs are not a suitable tool for protecting HLL in general. It is still possible that UHFs could be safely used in weaker attack scenarios, e.g.\ S2. We leave a detailed study to future work. 
 
 \subsection{Instantiating the PRF}
 
@@ -658,6 +667,14 @@ We have given a formal analysis of using a PRF as a countermeasure to our attack
 
 \todo{Sim based of indepednent interest, arguably more powerful than game-based notions with fixed winning predicates.}
 %It is also an open problem to close the performance gap that exists between fast but non-cryptographic hashes used in HLL implementations today and the slower but cryptographically strong VIL-PRF that is needed to obtain security.
+
+\ifanon
+\else
+\section*{Acknowledgements}
+The work of Paterson is supported in part by a gift from VMware.
+
+The authors thank Anupama Unnikrishnan for useful discussions on simulation-based definitions.
+\fi
 
 \bibliographystyle{ieeetr}
 \bibliography{ref.bib}
