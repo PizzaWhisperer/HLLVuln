@@ -178,7 +178,7 @@ The adversarial capabilities in each of scenarios S1 to S4 are summarised in Tab
 \begin{table}[tb!]
 \small
 \centering
-\caption{Adversarial capabilities in scenarios S1, S2, S3 and S4.}
+\caption{Adversarial capabilities in scenarios S1, S2, S3, and S4.}
 \medskip
      \makebox[\linewidth]{
 \begin{tabular}{| m{11em} | m{2em} | m{2em} | m{2em} | m{2em} |}
@@ -445,22 +445,25 @@ This completes our analysis of Redis. The key takeaway is that, in scenarios S2 
 %\todo{What about S1 here? Seems harder because we may not get accurate HLL estimates due to rounding again. We need to show that decreasing $C_0$ by 1 is noticeable in Ertl's formula even with rounding.}
 
 \section{Experimental Results}\label{sec:exp}
-Many different implementations of HLL are available online. Among the repositories collecting more than 350 stars on GitHub are~\cite{clahll,datasketch}. HLL is also featured in many frameworks, including Redis~\cite{redis}, Google's BigQuery~\cite{bigquery}, Facebook's Airlift~\cite{airlift} and several products of Apache such as Spark~\cite{spahll} and Druid~\cite{druhll}. All these implementations use a constant number of buckets and a fixed hash function. Thus they are  vulnerable to our attacks. %\todo[inline]{maybe switch to one of these, or somehow be more clear about how the attacks transfer.}
+Many different implementations of HLL are available online. Among the repositories collecting more than 350 stars on GitHub are~\cite{clahll,datasketch}. HLL is also featured in many frameworks, including Redis~\cite{redis}, Google's BigQuery~\cite{bigquery}, Facebook's Airlift~\cite{airlift} and several products of Apache such as Spark~\cite{spahll} and Druid~\cite{druhll}. All these implementations use a constant number of buckets and a fixed hash function. Thus they are vulnerable to our attacks. %\todo[inline]{maybe switch to one of these, or somehow be more clear about how the attacks transfer.}
 
-As a proof-of-concept, we implemented our attacks against the HLL implementation from~\cite{clahll}, since it is faithful to the original description of HLL given in~\cite{hll}.\footnote{We will make our attack code available on acceptance.}
+As a proof-of-concept, we implemented our attacks against the HLL implementation from~\cite{clahll}, since it is faithful to the original description of HLL given in~\cite{hll}, and against the HLL Beta implementation used in the popular Redis framework~\cite{redis}.\footnote{We will make our attack code available on acceptance.}
 %at \href{https://github.com/PizzaWhisperer/HLLVuln}{\url{https://github.com/PizzaWhisperer/HLLVuln}}.} 
 %\todo{We need to make sure the repo is publicly accessible but anonymised for submission, if we are going to include it.}
-For simplicity, we take ${\mathcal{X}}$ to be the set of 4-character long ASCII strings, with $\lvert {\mathcal{X}} \rvert = 7,311,616= 2^{22.8}$. We stress that this choice of inputs is merely illustrative and the results do not in any way depend on choosing ASCII strings. We choose $h$ to be the 32-bit MurmurHash3 function from~\cite{murmur3code}; again the attacks do not depend on the specifics of what fixed hash function is used.
+For simplicity, we take ${\mathcal{X}}$ to be the set of integers ranging from 0 to 1,048,576, with $\lvert {\mathcal{X}} \rvert = 2^{20}$. We stress that this choice of inputs is merely illustrative, as the attacks are not sensitive at all to the form of the inputs - all that is needed is that the hash function $h$, acting on those inputs, should have approximately uniform outputs. So 20-bit integers are just as good as, say, IP packet headers, for experimental evaluation. 
+
+\subsection{Attacking ~\cite{clahll}}
+We choose $h$ to be the 32-bit MurmurHash3 function from~\cite{murmur3code}; again the attacks do not depend on the specifics of what fixed hash function is used.
 %(note that the library allows the hash function to be specified; we pick Murmur3 for our attack and consider it reasonable that the adversary should know the hash function in use).
 We create an HLL sketch using $n=8$ and hence $m=256$ buckets and, for attacks in the setting of an initially non-empty target HLL sketch, initialise it with 1,000 random items representing honest users' data.
 
-We then challenge the adversary to pick the largest possible number of items to add to the sketch from our set of  $2^{22.8}$ possible inputs while trying to keep the cardinality estimate as low as possible, in each of the scenarios S1, S2 and S4. 
+We then challenge the adversary to pick the largest possible number of items to add to the sketch from our set of  $2^{20}$ possible inputs while trying to keep the cardinality estimate as low as possible, in each of the scenarios S1, S2 and S4. 
 
 As a second experiment, and in order to get results that can be compared to the work of~\cite{hllvuln}, we mount our attack in their more restrictive setting: instead of picking from the universe of possible strings, the adversary has to choose what to insert from a set of 250,000 random items that are given to it. Finally, for completeness, we also run the attacks against HLL sketches filled with adversarial inputs only, thus that are initially empty. We vary the value of $B$ in the attack for scenario S1 to demonstrate some of the available trade-offs. For simplicity and to keep the attack as striking as possible, we set $B$ to 1 in the attacks on an initially empty HLL sketch in scenarios S2 and S4. All attacks were run 30 times and we report average outcomes. Our results are reported in Tables~\ref{table:tab1} and~\ref{table:tab2}, which detail the estimated cardinality at the beginning of the attack, the number of items added by the adversary, and the cardinality estimate after adding the adversary's items.
 
 These empirical results confirm our analysis on several points.
 
-First, when attacking a sketch already containing 1000 random items, we can see that the adversary is on average able to insert about half of the $2^{22.8}$ items in our starting set in scenario S2, and about 83\% in scenario S4. The cardinality estimate is, on average, increased slightly in S2 (from 1,000 to 1,011) and remains at the same starting value (1,005 on average) in S4. In both cases, we inserted more than 3 million items whilst increasing the cardinality estimate by about $0.1\%$!  These results align well with our theoretical analysis.  
+First, when attacking a sketch already containing 1000 random items, we can see that the adversary is on average able to insert about half of the $2^{20}$ items in our starting set in scenario S2, and about 83\% in scenario S4. The cardinality estimate is, on average, increased slightly in S2 (from 1,000 to 1,011) and remains at the same starting value (1,005 on average) in S4. In both cases, we inserted more than half a million items whilst increasing the cardinality estimate by about $0.1\%$!  These results align well with our theoretical analysis.  
 %In scenario S1 we run the attack designed for an initially empty target HLL sketch. It performs well in practice, for example, increasing the HLL cardinality estimate from 100 to 126????
 %( $205$'$000 \approx 250'000 \times 0.82 \approx 250$'$000\times(1-\frac{1}{2\times H_c})$, with $H_c\approx\frac{1'000}{256}=3.9$)
 %Here $0.83 \approx (1-\frac{1}{2\cdot H_c})$ with $H_c\approx\frac{1000}{256}=3.9$, so the results are also consistent with our theoretical analysis.
@@ -480,7 +483,7 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
     \textbf{\# Targeted buckets $B$} & 1 & 100 & n/a & 1 & n/a & 1 \\ \hline
     \textbf{HLL initially empty?} & yes & yes & no & yes & no & yes \\ \hline
     \textbf{Original Card. Est.} & 0 & 0 & 1,000 & 0 & 1,005 & 0 \\ \hline
-    \textbf{\# Items added} & 28,566 & 2,856,100 & 3,655,744 & 28,566 & 6,090,003 & 28,566 \\ \hline
+    \textbf{\# Items added} & 4,096 & 409,595 & 524,288 & 28,566 & 870,320 & 409,595 \\ \hline
     \textbf{Final Card. Est.} & 1 & 126 & 1,011 & 1 & 1,005 & 1 \\ \hline
 \end{tabular}}
 \label{table:tab1}
@@ -503,6 +506,32 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 \label{table:tab2}
 \end{table*}
 
+\subsection{Attacking Redis implementation}
+For completeness, we attack the HLL Beta implementation used in the widespread Redis framework~\cite{redis}, which we recall is different than the original HLL algorithm given in~\cite{hll}.
+The hash function $h$ is fixed as the 64-bit MurmurHash3 function. The seed used internally is hardcoded and can be extracted by inspection of the openly-available Redis codebase.
+Furthermore, the number of buckets is constant and set to 16,384. Those informations allow to gain the knowledge of an S2 adversary.
+As a classic Redis application separates the server, owning the sketch, from the client, interacting with the sketch, we consider that the scenarios S3 or S4, while possible, are not the typical Redis use case. 
+Thus, we only consider a limited adversary, and implement our attacks under the scenario S2 as described in Section~\ref{sec:redis}.
+For simplicity, we set $\epsilon$ to $\frac{1}{2}$ in the attack on an initially empty HLL sketch.
+The results are averaged over 30 iterations and reported in Table~\ref{table:tab3}.
+Similarly to the section above, our empirical results confirm our theoretical analysis.
+
+\begin{table*}[tb!]
+\small\centering
+\caption{Attack results, averaged over 30 iterations.}
+\medskip
+     \makebox[\linewidth]{
+\begin{tabular}{| m{11em} | m{4em} | m{4.2em} |}
+    \hline
+    \textbf{Scenario} &  \multicolumn{2}{c|}{S2} \\ \hline
+    \textbf{$\epsilon$} & n/a & 0.5 \\ \hline
+    \textbf{HLL initially empty?} & no & yes \\ \hline
+    \textbf{Original Card. Est.} & 70,140 & 0 \\ \hline
+    \textbf{\# Items added} & 524,455 & 524,275 \\ \hline
+    \textbf{Final Card. Est.} & 73,249 & 13,188 \\ \hline
+\end{tabular}}
+\label{table:tab3}
+\end{table*}
 %\todo[inline]{Results from Redis or GBQ if we get them.}
 
 \subsection{Relating the Attacks to Applications}\label{sec:exp-apps}
@@ -510,7 +539,6 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 So far, we have treated attacks in an abstract way, working with an off-the-shelf implementation of HLL. We now illustrate what effect such attacks might have on applications relying on HLL for cardinality estimation. Specifically, we analyse a recent paper~\cite{flexswitch} from the networking systems community.
 
 The authors of~\cite{flexswitch} propose to use HLL for recording traffic flow statistics in datacenter network switches. The idea is to use HLL so as to reduce the amount of memory needed in the switches. The resulting switches are called \emph{flexswitches} in~\cite{flexswitch}. In the main example considered in~\cite[Section 3.1]{flexswitch}, each flow is identified by a 4-tuple consisting of source IP address, destination IP address, source port, and destination port. Various parameters for the HLL sketch to be used are then explored in~\cite{flexswitch}, trading memory consumed for accuracy of estimation of the number of concurrent flows. The paper also proposes to use the low range correction method of Fig.~\ref{fig:hll}. At no point does the discussion in~\cite{flexswitch} consider adversarial input (it does mention worst-case performance but only in passing, and no indication is given of how to handle this). It is clear that, by modifying the 16-bit source port (for example), an adversary could fool the switch into undercounting the flows the adversary is responsible for producing. Depending on how the flow count is used, this could lead to undetected DoS conditions, mis-provisioning of network capacity, or under-billing of the adversary for its traffic. In Appendix~\ref{sec:flexswitch} we provide further analysis showing that each use of HLL proposed in~\cite{flexswitch} can be subverted by an S2 adversary.
-
 
 %\todo[inline]{This ends up being pretty harsh on this NSDI paper, but hey. We may shorten or move some details to an appendix.}
 
