@@ -2,19 +2,20 @@
 \acmversiontrue
 
 \newif\ifanon % turn on ACM style (can be short or full)
-\anontrue
+\anonfalse
 
 \ifacmversion
 
-\documentclass[sigconf, anonymous, dvipsnames]{acmart} %dvipsnames for old/new macros
+%\documentclass[sigconf, anonymous, dvipsnames]{acmart} %dvipsnames for old/new macros
+\documentclass[sigconf, dvipsnames]{acmart} %dvipsnames for old/new macros
 
 \fancyhf{} % Remove fancy page headers 
-\fancyhead[C]{Anonymous submission \#147 to ACM CCS 2021} % TODO: replace 9999 with your paper number
+%\fancyhead[C]{Anonymous submission \#147 to ACM CCS 2021} % TODO: replace 9999 with your paper number
 \fancyfoot[C]{\thepage}
 
 \setcopyright{none} % No copyright notice required for submissions
-\acmConference[Anonymous Submission to ACM CCS 2021]{ACM Conference on Computer and Communications Security}{Due 6 May 2021}{Seoul, South Korea}
-\acmYear{2021}
+%\acmConference[Anonymous Submission to ACM CCS 2021]{ACM Conference on Computer and Communications Security}{Due 6 May 2021}{Seoul, South Korea}
+%\acmYear{2021}
 
 \settopmatter{printacmref=false, printccs=true, printfolios=true} % We want page numbers on submissions
 
@@ -40,8 +41,17 @@
 %\newtheorem{theorem}{Theorem}
 
 \title{HyperLogLog: Exponentially Bad in Adversarial Settings}
-%\author{{\rm Kenneth G. Paterson}\\ {\rm ETH Zurich} \and {\rm Mathilde Raynal\thanks{Work done while an exchange student at ETH Zurich.}}\\ {\rm EPFL}}
-%{\tt kenny.paterson@inf.ethz.ch, mraynal@student.ethz.ch}}
+
+
+\author{Kenneth G. Paterson}
+%\orcid{...}
+\affiliation{ETH Zurich}
+\email{kenny.paterson@inf.ethz.ch}
+
+\author{Mathilde Raynal}
+%\orcid{...}
+\affiliation{EPFL}
+\email{mraynal@student.ethz.ch}
 
 \begin{document}
 
@@ -200,7 +210,12 @@ Scenario S1 is distinctive in that it is the only one in which the adversary has
 
 Scenarios S2, S3 and S4 gradually increase the power of the adversary. 
 
-At first sight it might appear that an S3 adversary can easily infer the knowledge given to our S4 adversary in its snapshot. Indeed, an S3 adversary could try to recover the contents of each bucket in the sketch simply by analysing which inputs lead to increases in the cardinality estimate: to find the value held in a targeted bucket, the adversary would insert a sequence of items $x$ with an incrementing number of leading zeros in the $\ell$ rightmost bits of $h(x)$ whilst holding the $n$ bits determining the bucket index constant, until the cardinality estimate of the sketch increases. This assumes the adversary has sufficient flexibility in its input that the conditions on $h(x)$ can be forced. 
+The S2 adversary can insert items and knows the hash function $h$ and number of buckets $m$, but is otherwise blind. Such an adversary is quite realistic. For example, both the Redis and Presto implementations of HLL use a fixed hash function and parameters that can be read off from source code.\footnote{See \url{https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L396}, \url{
+https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L466} for Redis and 
+\url{https://github.com/prestodb/presto/blob/2ad67dcf000be86ebc5ff7732bbb9994c8e324a8/presto-main/src/main/java/com/facebook/presto/type/khyperloglog/KHyperLogLog.java\#L20}
+for Presto.}
+
+The S3 and S4 adversaries have stronger capabilities. The access to cardinality estimates in S3 would typically be provided via an API, while the additional access to the bucket contents in S4 may require insider capabilities. At first sight it might appear that an S3 adversary can easily infer the knowledge given to our S4 adversary in its snapshot. Indeed, an S3 adversary could try to recover the contents of each bucket in the sketch simply by analysing which inputs lead to increases in the cardinality estimate: to find the value held in a targeted bucket, the adversary would insert a sequence of items $x$ with an incrementing number of leading zeros in the $\ell$ rightmost bits of $h(x)$ whilst holding the $n$ bits determining the bucket index constant, until the cardinality estimate of the sketch increases. This assumes the adversary has sufficient flexibility in its input that the conditions on $h(x)$ can be forced. 
 
 However, this procedure does not work as simply as just described because of numerical issues that arise in the computation of the cardinality estimate. Specifically, increasing the value held in some bucket from $M[j]$ to $M[j]+1$ \emph{decreases} the denominator in the raw cardinality estimate $\sum_{j=1}^m2^{-M[j]}$ by an amount $2^{-M[j]-1}$. This does lead to a change in the raw cardinality estimate $E = \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}$. However, in practice, the raw cardinality estimate is rounded before being presented to the adversary, so this change may not actually be detectable, especially when $M[j]$ becomes large. We have done experiments which shows this to be the case for parameters arising in practice. 
 
@@ -284,7 +299,7 @@ By construction and from Lemma~\ref{lem:bound}, we are guaranteed that the cardi
 The simple version of our attack uses the above idea, inserting items $x$ into the shadow HLL sketch but resetting it as soon as the cardinality estimate increases from $B$ to $B+1$ (indicating that a non-target bucket has been hit by item $x$). Acting in this way precisely determines whether each inserted item hits the target buckets or not, so has no ``false positives'' which need to be eliminated through reprocessing of the list ${\mathcal{L}}$. This means that the attack can be carried out in a streaming fashion in a single pass over ${\mathcal{X}}$. Assuming $h$ behaves like a random function, we must perform a reset with probability $\frac{m-B}{m} = 1 - \frac{B}{m}$ per item inserted, and hence in total an expected number of $(1 - \frac{B}{m})\cdot | \mathcal{X} |$ resets.
 
 \paragraph{Complex Attack:}
-The more complex version of the attack only resets the shadow HLL sketch when its cardinality estimate reaches a value indicating that $B_{\max}$ buckets have been hit (recall this number can be determined precisely because of the use of the Hit Counting algorithm for cardinality estimation). Hence, fewer resets should be required. However, when the number of active buckets has reached some value $B^\prime \leq B_{\max}$ this means that an item $x$ may not increase the cardinality estimate, yet still not hit one of the $B$ target buckets (instead it hits one of the other $B^\prime - B$ active buckets). Such an $x$ acts as a ``false positive" and needs to be eliminated through reprocessing of the list ${\mathcal{L}}$.
+The more complex version of the attack only resets the shadow HLL sketch when its cardinality estimate reaches a value indicating that $B_{\max}$ buckets have been hit (recall this number can be determined precisely because of the use of the Hit Counting algorithm for cardinality estimation). Hence, fewer resets should be required. However, when the number of active buckets has reached some value $B^\prime \leq B_{\max}$ this means that an item $x$ may not increase the cardinality estimate, yet still not hit one of the $B$ target buckets (instead it hits one of the other $B^\prime - B$ active buckets). Such an $x$ acts as a ``false positive" and needs to be eliminated through reprocessing of the list ${\mathcal{L}}$ (as previously described).
 
 \paragraph{Analysis of the Complex Attack:}
 %Suppose that after each reset, the order of the items in ${\mathcal{X}}$ (or ${\mathcal{L}}$) that have not yet been processed on the current pass is randomised. (Here we exclude the special items  $x_1,\ldots, x_B$ from the reordering.) Then 
@@ -400,9 +415,9 @@ Since the target sketch has an unknown status for the adversary, our previous st
 
 \section{Analysis of the Redis HLL Implementation}\label{sec:redis}
 
-We present a brief analysis of the HLL implementation used in Redis, since Redis is a popular distributed, in-memory key-value store implementation and the version of HLL used there differs significantly from that described in Figure~\ref{fig:hll}.
+We present an analysis of the HLL implementation used in Redis, since Redis is a popular distributed, in-memory key-value store implementation and the version of HLL used there differs significantly from that described in Figure~\ref{fig:hll}.
 
-HLL was first added to Redis in release 2.8.9 in April 2014. Redis 4.0 released in April 2017 introduced HLL Beta, which improves on the raw HLL cardinality estimator by using polynomial interpolation to reduce systematic errors. Redis 5.0 released in October 2018 replaces this with a new cardinality estimator based closely on the work of Ertl~\cite{hllnew}. This method is still used in the current release (Redis 6.2.2) and so is the object of our study here.\footnote{For details of Redis releases, see \url{https://github.com/redis/redis/blob/6.2/00-RELEASENOTES} and other files obtained by replacing ``6.2'' in this URL with the desired version number.}
+HLL was first added to Redis in release 2.8.9 in April 2014. Redis 4.0 released in April 2017 introduced HLL Beta, which improves on the raw HLL cardinality estimator by using polynomial interpolation to reduce systematic errors. Redis 5.0 released in October 2018 replaces this with a new cardinality estimator based closely on the work of Ertl~\cite{hllnew}. This method is still used in the current release (Redis 6.2.5) and so is the object of our study here.\footnote{For details of Redis releases, see \url{https://github.com/redis/redis/blob/6.2/00-RELEASENOTES} and other files obtained by replacing ``6.2'' in this URL with the desired version number.}
 
 Ertl~\cite{hllnew} proposed using the following cardinality estimator in place of the raw estimator in Figure~\ref{fig:hll}:
 \begin{equation}\label{eqn:ertl}
@@ -447,12 +462,14 @@ This completes our analysis of Redis. The key takeaway is that, in scenarios S2 
 \section{Experimental Results}\label{sec:exp}
 Many different implementations of HLL are available online. Among the repositories collecting more than 350 stars on GitHub are~\cite{clahll,datasketch}. HLL is also featured in many frameworks, including Redis~\cite{redis}, Google's BigQuery~\cite{bigquery}, Facebook's Airlift~\cite{airlift} and several products of Apache such as Spark~\cite{spahll} and Druid~\cite{druhll}. All these implementations use a constant number of buckets and a fixed hash function. Thus they are vulnerable to our attacks. %\todo[inline]{maybe switch to one of these, or somehow be more clear about how the attacks transfer.}
 
-As a proof-of-concept, we implemented our attacks against the HLL implementation from~\cite{clahll}, since it is faithful to the original description of HLL given in~\cite{hll}, and against the HLL Beta implementation used in the popular Redis framework~\cite{redis}.\footnote{We will make our attack code available on acceptance.}
+As a proof-of-concept, we implemented our attacks against the HLL implementation from~\cite{clahll}, since it is faithful to the original description of HLL given in~\cite{hll}, and against the HLL implementation used in Redis~\cite{redis}.\footnote{Our attack code is available on request.}
 %at \href{https://github.com/PizzaWhisperer/HLLVuln}{\url{https://github.com/PizzaWhisperer/HLLVuln}}.} 
 %\todo{We need to make sure the repo is publicly accessible but anonymised for submission, if we are going to include it.}
-For simplicity, we take ${\mathcal{X}}$ to be the set of integers ranging from 0 to 1,048,576, with $\lvert {\mathcal{X}} \rvert = 2^{20}$. We stress that this choice of inputs is merely illustrative, as the attacks are not sensitive at all to the form of the inputs - all that is needed is that the hash function $h$, acting on those inputs, should have approximately uniform outputs. So 20-bit integers are just as good as, say, IP packet headers, for experimental evaluation. 
+For simplicity, we take ${\mathcal{X}}$ to be the set of integers ranging from 0 to $2^{20}-1$, so $\lvert {\mathcal{X}} \rvert = 2^{20}$. We stress that this choice of inputs is merely illustrative, as the attacks are not sensitive at all to the form of the inputs -- all that is needed is that the hash function $h$, acting on those inputs, should have approximately uniform outputs. So 20-bit integers are just as good as, say, IP packet headers, for experimental evaluation. 
 
-\subsection{Attacking ~\cite{clahll}}
+\subsection{Results for a ``Classic'' HLL Implementation}
+
+We first focus on a classic HLL implementation as per the original HLL paper~\cite{hll}, namely the implementation of~\cite{clahll}.
 We choose $h$ to be the 32-bit MurmurHash3 function from~\cite{murmur3code}; again the attacks do not depend on the specifics of what fixed hash function is used.
 %(note that the library allows the hash function to be specified; we pick Murmur3 for our attack and consider it reasonable that the adversary should know the hash function in use).
 We create an HLL sketch using $n=8$ and hence $m=256$ buckets and, for attacks in the setting of an initially non-empty target HLL sketch, initialise it with 1,000 random items representing honest users' data.
@@ -474,7 +491,7 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 
 \begin{table*}[tb!]
 \small\centering
-\caption{Attack results, averaged over 30 iterations.}
+\caption{Attack results for a classic HLL implementation, averaged over 30 iterations.}
 \medskip
      \makebox[\linewidth]{
 \begin{tabular}{| m{11em} | m{4em} | m{4.2em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
@@ -491,7 +508,7 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 
 \begin{table*}[tb!]
 \small\centering
-\caption{Attack results, averaged over 30 iterations, in the setting of~\cite{hllvuln}.}
+\caption{Attack results for a classic HLL implementation, averaged over 30 iterations, in the setting of~\cite{hllvuln}.}
 \medskip
      \makebox[\linewidth]{
 \begin{tabular}{| m{11em} | m{4em} | m{4.2em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
@@ -506,19 +523,19 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 \label{table:tab2}
 \end{table*}
 
-\subsection{Attacking Redis implementation}
-For completeness, we attack the HLL Beta implementation used in the widespread Redis framework~\cite{redis}, which we recall is different than the original HLL algorithm given in~\cite{hll}.
+\subsection{Results for Redis}
+We also implemented our attacks for the HLL implementation used in Redis as described in Section~\ref{sec:redis}.
 The hash function $h$ is fixed as the 64-bit MurmurHash3 function. The seed used internally is hardcoded and can be extracted by inspection of the openly-available Redis codebase.
-Furthermore, the number of buckets is constant and set to 16,384. Those informations allow to gain the knowledge of an S2 adversary.
-As a classic Redis application separates the server, owning the sketch, from the client, interacting with the sketch, we consider that the scenarios S3 or S4, while possible, are not the typical Redis use case. 
-Thus, we only consider a limited adversary, and implement our attacks under the scenario S2 as described in Section~\ref{sec:redis}.
-For simplicity, we set $\epsilon$ to $\frac{1}{2}$ in the attack on an initially empty HLL sketch.
+Furthermore, the number of buckets is constant and set to 16,384. Knowledge of theese parameters places us in the setting of an S2 adversary.
+Since a classic Redis application separates the server owning the sketch from the client interacting with the sketch, we consider that the scenarios S3 or S4, while possible, are not typical Redis use case. 
+Thus, we only consider scenario S2 for Redis.
+For simplicity, we set attack parameter $\epsilon$ to $\frac{1}{2}$ in the attack on an initially empty HLL sketch.
 The results are averaged over 30 iterations and reported in Table~\ref{table:tab3}.
-Similarly to the section above, our empirical results confirm our theoretical analysis.
+Similarly to the case for classic HLL, our empirical results match with our theoretical analysis.
 
 \begin{table*}[tb!]
 \small\centering
-\caption{Attack results, averaged over 30 iterations.}
+\caption{Attack results for HLL in Redis, averaged over 30 iterations.}
 \medskip
      \makebox[\linewidth]{
 \begin{tabular}{| m{11em} | m{4em} | m{4.2em} |}
@@ -619,7 +636,7 @@ Moreover, if ${\mathcal{A}}$ makes $q$ queries to its \texttt{insert($\cdot$)} o
 
 Note that our security analysis using a simulation-based definition does not require us to specify a winning condition for the adversary. Rather, we infer from inspecting the simulator what the adversary can (or cannot) achieve in the ideal world, and show that no efficient adversary can distinguish the real and ideal worlds. This is in contrast to the game-based approach of~\cite{CCS:ClaPatShrPS19} which needs a complex definition to say when the adversary has successfully manipulated a probabilistic data structure. This reveals a strength of the simulation-based approach in more complex settings like ours.
 
-Note also that, for our definition to meaningfully capture security against cardinality manipulation, it is important to restrict  ${\mathcal{S}}$ to doing random sampling when handling \texttt{insert($\cdot$)} queries. Otherwise, our definition could be vacuously satisfied (for example ${\mathcal{S}}$ could just sample the PRF key $K$ for itself and provide a perfect real-world view). This is somewhat different to common simulation-based security definitions, where ${\mathcal{S}}$'s input might be restricted (e.g.\ in a confidentiality definition, ${\mathcal{S}}$ might receive only $|m|$ in place of $m$) but its behaviour is not. Crucially, in our setting, security arises from inspecting the details of ${\mathcal{S}}$ and observing how it instantiates HLL in the average case.
+Note also that, for our definition to meaningfully capture security against cardinality manipulation, it is important to restrict  ${\mathcal{S}}$ to doing random sampling when handling \texttt{insert($\cdot$)} queries. Otherwise, our definition could be vacuously satisfied (for example ${\mathcal{S}}$ could just sample the PRF key $K$ for itself and provide a perfect real-world view). This is somewhat different to common simulation-based security definitions, where ${\mathcal{S}}$'s input might be restricted (e.g.\ in a confidentiality definition, ${\mathcal{S}}$ might receive only $|m|$ in place of $m$) but its behaviour is not. Crucially, in our setting, security arises from inspecting the details of ${\mathcal{S}}$ and observing that it instantiates HLL in the average case.
 
 \subsection{On Confidentiality}
 
@@ -667,7 +684,7 @@ We note that using keyed functions sacrifices the mergeability property that HLL
 
 
 \section{Conclusion}\label{sec:conclusions}
-The HyperLogLog algorithm is an elegant and efficient solution to the problem of estimating the cardinality of large sets. Its simple structure makes it easy to code and use, as shown by the growing number of available open-source implementations. Nonetheless, we have shown that malicious users can manipulate the HLL cardinality estimate and thence break the security properties of systems relying on HLL. Our attacks are simple but powerful and should raise awareness of the limitations of HLL. Our analysis may assist software developers in understanding the risks they run when using HLL in adversarial settings. We have also provided a simple method for securing HLL in adversarial settings: simply replace the internal hash function by a keyed PRF, and one obtains full protection even in scenario S4, our strongest attack scenario.
+The HyperLogLog algorithm is an elegant and efficient solution to the problem of estimating the cardinality of large sets. Its simple structure makes it easy to code and use, as shown by the growing number of available open-source implementations. Nonetheless, we have shown that malicious users can manipulate the HLL cardinality estimate and thence break the security properties of systems relying on HLL. Our attacks are simple but powerful and should raise awareness of the limitations of HLL. Our analysis may assist software developers in understanding the risks they run when using HLL in adversarial settings. We have also provided a method for securing HLL in adversarial settings: simply replace the internal hash function by a keyed PRF, and one obtains full protection even in scenario S4, our strongest attack scenario. %However, this solution requires the introduction of a cryptographic key, and all the attendant key management issues this brings. So while the solution is simple on paper, in practice, it is less so. 
 
 %Future work could consist in finding mitigations that do not rely on salt. For example, would the imposed ID setting (like Facebook) solve the issue but still be convenient for the various HLL applications?
 Left to future work is the task of extending our attacks and defences to HLL variants such as sliding HLL~\cite{slidinghll} and HLL++~\cite{hllpractice}. It would be interesting to find and analyse a strategy for more cleverly ordering the candidates in our attack in scenario S1 to reduce the total insertion cost of the attack, whilst also keeping the number of resets low. Finding an attack in scenario S1 when the target HLL sketch is initially non-empty is also open.
@@ -682,7 +699,7 @@ We have given a formal analysis of using a PRF as a countermeasure to our attack
 \section*{Acknowledgements}
 The work of Paterson is supported in part by a gift from VMware.
 
-The authors thank Anupama Unnikrishnan for useful discussions on simulation-based definitions.
+The authors thank Anupama Unnikrishnan for useful discussions on simulation-based definitions and Tom Shrimpton for suggesting to look at GoogleBigQuery.
 \fi
 
 \bibliographystyle{ieeetr}
