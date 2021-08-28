@@ -1,66 +1,96 @@
-\newif\ifacmversion % turn on ACM style (can be short or full)
-\acmversiontrue
 
-\newif\ifanon % turn on ACM style (can be short or full)
+\newif\ifIEEEversion % turn on IEEE style 
+\IEEEversionfalse
+\newif\ifanon % needed for acks, suppression of authors, etc
 \anonfalse
 
-\ifacmversion
 
-%\documentclass[sigconf, anonymous, dvipsnames]{acmart} %dvipsnames for old/new macros
-\documentclass[sigconf, dvipsnames]{acmart} %dvipsnames for old/new macros
+\ifIEEEversion
+%% what follows is for the IEEEtran format required for IEEE Euro S&P
 
-\fancyhf{} % Remove fancy page headers 
-%\fancyhead[C]{Anonymous submission \#147 to ACM CCS 2021} % TODO: replace 9999 with your paper number
-\fancyfoot[C]{\thepage}
+\documentclass[compsoc,conference,a4paper,10pt,times]{IEEEtran}
 
-\setcopyright{none} % No copyright notice required for submissions
-%\acmConference[Anonymous Submission to ACM CCS 2021]{ACM Conference on Computer and Communications Security}{Due 6 May 2021}{Seoul, South Korea}
-%\acmYear{2021}
-
-\settopmatter{printacmref=false, printccs=true, printfolios=true} % We want page numbers on submissions
-
-%%\ccsPaper{9999} % TODO: replace with your paper number once obtained
-
-\else
-\documentclass[%
-	dvipsnames,	%% xcolor
-	draft,
-]{article}
-\fi
-
-
-
-\usepackage{graphicx, amsmath, amsthm, amssymb, setspace, array, url, hyperref, xspace, todonotes, pifont}
+%% our own choice of packages 
+\usepackage{graphicx, amsmath, amsthm, amssymb, setspace, array, url, xspace, todonotes, pifont} %hyperref is supplied by IEEEtran below
 %\usepackage{a4wide}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
 
-%\newtheorem{lemma}{Lemma}
-%\newtheorem{theorem}{Theorem}
+%% packages and whatnot inherited from IEEEtran example file
+
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{bmpsize}
+\usepackage{xcolor}
+\usepackage{lipsum}
+\usepackage[colorlinks=true,urlcolor=black]{hyperref}
+%% commented out this nonsense
+%\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+%   T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+%% need these for IEEEtran - not defined in cls file
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+
+
+\begin{document}
 
 \title{HyperLogLog: Exponentially Bad in Adversarial Settings}
 
+\ifanon %% suppress authors in anonymous version
+\author{}
+\else
+\author{\IEEEauthorblockN{Kenneth G. Paterson}
+\IEEEauthorblockA{\textit{ETH Zurich} \\
+kenny.paterson@inf.ethz.ch}
+\and
+\IEEEauthorblockN{Mathilde Raynal}
+\IEEEauthorblockA{\textit{EPFL} \\
+mraynal@student.ethz.ch}
+}
+\fi %end anon processing of authors
 
-\author{Kenneth G. Paterson}
-%\orcid{...}
-\affiliation{ETH Zurich}
-\email{kenny.paterson@inf.ethz.ch}
+\else  %% what follows is a vanilla format for posting on eprint
 
-\author{Mathilde Raynal}
-%\orcid{...}
-\affiliation{EPFL}
-\email{mraynal@student.ethz.ch}
+\documentclass[a4paper,10pt]{article}
+
+%% our own choice of packages 
+\usepackage{graphicx, amsmath, amsthm, amssymb, setspace, array, url, xspace, todonotes, pifont, hyperref} 
+\usepackage{a4wide}
+%\usepackage{authblk}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
 
 \begin{document}
+
+\title{HyperLogLog: Exponentially Bad in Adversarial Settings}
+\ifanon %% suppress authors in anonymous version
+\author{}
+\else
+\author{Kenneth G. Paterson\\ETH Zurich\\\texttt{kenny.paterson@inf.ethz.ch} \and Mathilde Raynal\\EPFL\\\texttt{mraynal@student.ethz.ch}}
+\fi % end anon processing of authors 
+\fi % end of vanilla format 
+
+\maketitle
 
 
 \begin{abstract}
 Computing the count of distinct elements in large data sets is a common task but naive approaches are memory-expensive. The HyperLogLog (HLL) algorithm (Flajolet \emph{et al.}, 2007) estimates a data set's cardinality while using significantly less memory than a naive approach, at the cost of some accuracy. This trade-off makes the HLL algorithm very attractive for a wide range of applications such as database management and network monitoring, where an exact count may not be needed. The HLL algorithm and variants of it are implemented in systems such as Redis and Google Big Query. Recently, the HLL algorithm has started to be proposed for use in scenarios where the inputs may be adversarially generated, for example counting social network users or detection of network scanning attacks. This prompts an examination of the performance of the HLL algorithm in the face of adversarial inputs. We show that in such a setting, the HLL algorithm's estimate of cardinality can be exponentially bad: when an adversary has access to the internals of the HLL algorithm and has some flexibility in choosing what inputs will be recorded, it can manipulate the cardinality estimate to be exponentially smaller than the true cardinality. We study both the original HLL algorithm and a more modern version of it (Ertl, 2017) that is used in Redis. We present experimental results confirming our theoretical analysis. Finally, we consider attack prevention: we show how to modify HLL in a simple way that provably prevents cardinality estimate manipulation attacks.
 \end{abstract}
 
-\maketitle
+%\begin{IEEEkeywords}
+%yadda yadda
+%\end{IEEEkeywords}
 
 \section{Introduction}
 Data scientists today make use of systems like Google Big Query, Apache Spark, Presto and Redis to handle large data sets. Such systems include analytics engines capable of performing powerful operations on the data. Particularly useful to data scientists are summary statistics, with a key statistic being the number of distinct data items in a data set, i.e.\ the data set's cardinality. In many use cases, obtaining an approximate cardinality is sufficient. Over the last decade, the HyperLogLog (HLL) cardinality estimator~\cite{hll} has emerged as the algorithm of choice for this task, due to its excellent speed, low memory requirements and high proven accuracy.\footnote{Section~\ref{sec:overview} contains a complete specification of HLL.} It is also suitable for use in applications where it is not possible (or desirable) to store an entire data set, but instead where the data set is presented in a streaming fashion. HLL is used by all of the above-mentioned systems.
