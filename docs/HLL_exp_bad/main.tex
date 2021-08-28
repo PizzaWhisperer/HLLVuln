@@ -37,7 +37,7 @@
 %% need these for IEEEtran - not defined in cls file
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
-
+\newtheorem{definition}{Definition}
 
 \begin{document}
 
@@ -70,6 +70,7 @@ mraynal@student.ethz.ch}
 \newcommand{\xmark}{\ding{55}}%
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
 
 \begin{document}
 
@@ -612,7 +613,8 @@ Importantly, we will specify an ${\mathcal{S}}$ that handles all of ${\mathcal{A
 
 We will prove that  ${\mathcal{S}}$ is such that, given any adversary ${\mathcal{A}}$, then any distinguisher $\mathcal{E}$ that can distinguish between the $\textsf{out}_{\mathcal{A}}$ in the real world and $\textsf{out}_{\mathcal{S}}$ in the ideal world can be used to build an adversary ${{\mathcal{B}}}$ which breaks the PRF security of $F$. Under the assumption that $F$ is a good PRF, no such efficient distinguisher $\mathcal{E}$ can exist, and we may conclude that (up to PRF security) no efficient distinguisher can tell that it is interacting with the ideal world instead of the real world. 
 
-Why does this proof imply that ${\mathcal{A}}$ cannot manipulate the cardinality estimate? To see this, note that (amongst many other possibilities) ${\mathcal{A}}$'s output could be the cardinality estimate obtained from a \texttt{read} query, allowing a specific ${\mathcal{E}}$ to try to use that to distinguish between the two worlds. Yet, by the preceding argument, the simulator in the ideal world is able to produce an output that ${\mathcal{E}}$ cannot distinguish from that of ${\mathcal{A}}$ in the real world. In particular, our simulator will output whatever ${\mathcal{A}}$ outputs, so if ${\mathcal{A}}$ outputs the result of a \texttt{read} query in the ideal world, then so will ${\mathcal{S}}$. But in the ideal world, ${\mathcal{S}}$ uses random sampling for the $y$ values, so there ${\mathcal{S}}$ (and ${\mathcal{A}}$ that it runs) are operating in the setting where the average case analysis of HLL applies, as per~\cite{hll}. So in the ideal world this specific ${\mathcal{E}}$ would receive an accurate average case cardinality estimate. Since ${\mathcal{E}}$ tries to distinguish the two worlds from the cardinality estimate and we already showed that no efficient distinguisher ${{\mathcal{E}}}$ can exist, it must follow that the cardinality estimates produced in the real and ideal worlds are indistinguishable (up to PRF security). It then follows that ${\mathcal{A}}$ has no advantage when it comes to manipulating the HLL-$F$ cardinality estimate. So HLL, when instantiated with PRF $F$, is secure against cardinality manipulation attacks in S4 (and therefore in the weaker attacks models S2 and S3 as well). 
+Why does this proof imply that ${\mathcal{A}}$ cannot manipulate the cardinality estimate? To see this, note that (amongst many other possibilities) ${\mathcal{A}}$'s output could be the cardinality estimate obtained from a \texttt{read} query, allowing a specific ${\mathcal{E}}$ to try to use that to distinguish between the two worlds. Yet, by the preceding argument, the simulator in the ideal world is able to produce an output that ${\mathcal{E}}$ cannot distinguish from that of ${\mathcal{A}}$ in the real world. In particular, our simulator will output whatever ${\mathcal{A}}$ outputs, so if ${\mathcal{A}}$'s output $\textsf{out}_{\mathcal{A}}$ is the result of a \texttt{read} query in the ideal world, then so will ${\mathcal{S}}$'s. But in the ideal world, ${\mathcal{S}}$ uses random sampling for the $y$ values, so in that world ${\mathcal{S}}$ (and ${\mathcal{A}}$ that it runs) are operating in the setting where the average case analysis of HLL applies, as per~\cite{hll}. So in the ideal world this specific ${\mathcal{E}}$ would receive an accurate average case cardinality estimate. Since ${\mathcal{E}}$ tries to distinguish the two worlds from the cardinality estimate and we already showed that no efficient distinguisher ${{\mathcal{E}}}$ can exist, it must follow that the cardinality estimates produced in the real and ideal worlds are indistinguishable (up to PRF security). It then follows that ${\mathcal{A}}$ has no advantage when it comes to manipulating the HLL-$F$ cardinality estimate. So HLL, when instantiated with PRF $F$, is secure against cardinality manipulation attacks.
+% in S4 (and therefore in the weaker attacks models S2 and S3 as well). 
 
 %We will conclude our analysis by discussing how $F$ can be instantiated.
 
@@ -624,9 +626,6 @@ We now formalise the above intuition. We consider distinguisher ${\mathcal{E}}$ 
 \]
 %Using a standard transformation, this probability can be rewritten as $\lvert \Pr[b' = 1| b = 1] - \Pr[b'=0|b=1] \rvert$. 
 
-We say that the scheme HLL-$F$ is S$i$-simulation-secure with parameters $(q,t_{\mathcal{S}},t_{\mathcal{A}},t_{\mathcal{E}},\epsilon)$ if there exists a simulator $\mathcal{S}$ running in time at most $t_{\mathcal{S}}$ such that, for all adversaries ${\mathcal{A}}$ running in time at most $t_{\mathcal{A}}$ and making at most $q$ \texttt{insert($\cdot$)} queries and all distinguishers ${\mathcal{E}}$ running in time at most $t_{\mathcal{E}}$, we have
-$\mbox{Adv}^{\mbox{\tiny S$i$-RoI}}_{\mbox{\tiny{HLL-$F$, ${\mathcal{A}}$, ${\mathcal{S}}$}}}({\mathcal{E}}) \leq \epsilon$. We quantify over \texttt{insert($\cdot$)} queries (via $q$) and not other types of query because only \texttt{insert($\cdot$)} queries will appear in our concrete security analysis and we do not want to clutter the notation.
-
 The four oracles that  ${\mathcal{A}}$ can interact with behave as follows in the real world:
 \begin{itemize}
 \item \texttt{init($\cdot$)}: this oracle receives as input the HLL-$F$ parameters ($n$, $\ell$, $\alpha_m$) and performs initialisation of the HLL-$F$ sketch, including generating the array of $m=2^n$ buckets $M[j]$ and initialising all the entries to $0$, and selecting a key $K \leftarrow_{\$} \{0,1\}^k$ for keyed function $F: \{0,1\}^k \times {{\mathcal{D}}} \rightarrow  \{0,1\}^{n+\ell}$. This oracle has no output. It is available in all of S2, S3, S4. We assume it is only called once as ${\mathcal{A}}$'s first oracle query.
@@ -637,7 +636,16 @@ The four oracles that  ${\mathcal{A}}$ can interact with behave as follows in th
 
 We note that in S4 (and only in S4) the adversary has access to all four oracles. This makes it the strongest model, and hereafter we only target security in this model. 
 
-We next describe the simulator ${\mathcal{S}}$ for the ideal world. Simulator ${\mathcal{S}}$ operates by running ${\mathcal{A}}$ in a blackbox manner and handling all of its queries as follows: 
+\begin{definition}
+We say that the scheme HLL-$F$ is S$i$-simulation-secure with parameters $(q,t_{\mathcal{S}},t_{\mathcal{A}},t_{\mathcal{E}},\epsilon)$ if there exists a simulator $\mathcal{S}$ running in time at most $t_{\mathcal{S}}$ such that, for all adversaries ${\mathcal{A}}$ running in time at most $t_{\mathcal{A}}$ and making at most $q$ \texttt{insert($\cdot$)} queries and all distinguishers ${\mathcal{E}}$ running in time at most $t_{\mathcal{E}}$, we have
+$\mbox{Adv}^{\mbox{\tiny S$i$-RoI}}_{\mbox{\tiny{HLL-$F$, ${\mathcal{A}}$, ${\mathcal{S}}$}}}({\mathcal{E}}) \leq \epsilon$. 
+\end{definition}
+
+In the above definition, we quantify over \texttt{insert($\cdot$)} queries (via $q$) and not other types of query because only \texttt{insert($\cdot$)} queries will appear in our concrete security analysis and we do not want to clutter the notation.
+
+Note that our security analysis using a simulation-based definition does not require us to specify a winning condition for adversary $\mathcal{A}$. Rather, we infer from inspecting the simulator what the adversary can (or cannot) achieve in the ideal world, and show that no efficient algorithm $\mathcal{E}$ can distinguish the real and ideal worlds. This is in contrast to the game-based approach of~\cite{CCS:ClaPatShrPS19} which needs a complex definition to say when the adversary has successfully manipulated a probabilistic data structure. This reveals a strength of the simulation-based approach in more complex settings like ours.
+
+We next describe the simulator ${\mathcal{S}}$ that we will use in our further analysis: ${\mathcal{S}}$ operates by running ${\mathcal{A}}$ in a blackbox manner and handling all of its queries as follows: 
 \begin{itemize}
 \item \texttt{init($\cdot$)}: on input $n$, $\ell$, $\alpha_m$, ${\mathcal{S}}$ initialises an HLL sketch as in Figure~\ref{fig:hll}; that is, it creates an array of $m=2^n$ buckets $M[j]$ and initialises them all to 0.
 \item \texttt{insert($\cdot$)}: on input $x \in {{\mathcal{D}}}$,  ${\mathcal{S}}$ ignores $x$, sets $y \leftarrow_{\$} \{0,1\}^{n+\ell}$, and proceeds to update the buckets using this value of $y$ as in the original HLL algorithm in Figure~\ref{fig:hll}.
@@ -646,11 +654,17 @@ We next describe the simulator ${\mathcal{S}}$ for the ideal world. Simulator ${
 \end{itemize}
 At the end of ${\mathcal{A}}$'s execution, ${\mathcal{S}}$ takes ${\mathcal{A}}$'s output and forwards it to ${\mathcal{E}}$ as its own output. Notice that the running time of  ${\mathcal{S}}$ is (roughly) equal to that of ${\mathcal{A}}$.
 
+For our definition to meaningfully capture security against cardinality manipulation, it is important to restrict ${\mathcal{S}}$ to doing random sampling when handling \texttt{insert($\cdot$)} queries. Otherwise, our definition could be vacuously satisfied (for example ${\mathcal{S}}$ could just sample the PRF key $K$ for itself and provide a perfect real-world view). This is somewhat different to common simulation-based security definitions, where ${\mathcal{S}}$'s input might be restricted (e.g.\ in a confidentiality definition, ${\mathcal{S}}$ might receive only $|m|$ in place of $m$) but its behaviour is not. Crucially, in our setting, security arises from inspecting the details of ${\mathcal{S}}$ and observing that it instantiates HLL in the average case.
+
+We require one further standard definition.
+\begin{definition}
 We define the PRF advantage of an adversary ${{\mathcal{B}}}$ against $F$ outputting a bit $d'$ as being its advantage in distinguishing whether it is interacting with $F$ for a uniformly random key $K$ ($d=0$) or interacting with a truly random function ($d=1$). Thus: 
 \[
 \mbox{Adv}^{\mbox{\tiny PRF}}_{F}({{\mathcal{B}}}) := \lvert 2\Pr[d' = d] - 1 \rvert\,.
 \]
+\end{definition}
 Here, we assume without loss of generality that all of ${{\mathcal{B}}}$'s queries are distinct. See~\cite[Section 4.4.1]{BonehShoup} for details of the PRF security definition.
+
 
 Now we are ready to formally state our main result. The proof can be found in Appendix~\ref{sec:proof}.
 \begin{theorem}\label{thm:security-of-HLL-with-PRF}
@@ -664,9 +678,6 @@ Moreover, if ${\mathcal{A}}$ makes $q$ queries to its \texttt{insert($\cdot$)} o
 
 %Informally, if $F$ is a good PRF, then $\mbox{Adv}^{\mbox{\tiny PRF}}_{F}({{\mathcal{B}}})$ should be small for any adversary ${{\mathcal{B}}}$ running in a reasonable amount of time; hence the advantage of any S4 adversary  ${\mathcal{A}}$ against HLL using PRF $F$ is also small. Note that our proof still applies for the improved algorithm of~\cite{hllnew} that is used in Redis. The only changes to the proof are to use the Redis approach for computing responses to \texttt{read} queries in place of the classical HLL approach.
 
-Note that our security analysis using a simulation-based definition does not require us to specify a winning condition for the adversary. Rather, we infer from inspecting the simulator what the adversary can (or cannot) achieve in the ideal world, and show that no efficient adversary can distinguish the real and ideal worlds. This is in contrast to the game-based approach of~\cite{CCS:ClaPatShrPS19} which needs a complex definition to say when the adversary has successfully manipulated a probabilistic data structure. This reveals a strength of the simulation-based approach in more complex settings like ours.
-
-Note also that, for our definition to meaningfully capture security against cardinality manipulation, it is important to restrict  ${\mathcal{S}}$ to doing random sampling when handling \texttt{insert($\cdot$)} queries. Otherwise, our definition could be vacuously satisfied (for example ${\mathcal{S}}$ could just sample the PRF key $K$ for itself and provide a perfect real-world view). This is somewhat different to common simulation-based security definitions, where ${\mathcal{S}}$'s input might be restricted (e.g.\ in a confidentiality definition, ${\mathcal{S}}$ might receive only $|m|$ in place of $m$) but its behaviour is not. Crucially, in our setting, security arises from inspecting the details of ${\mathcal{S}}$ and observing that it instantiates HLL in the average case.
 
 \subsection{On Confidentiality}
 
