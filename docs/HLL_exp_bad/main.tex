@@ -1,8 +1,8 @@
 
 \newif\ifIEEEversion % turn on IEEE style 
-\IEEEversionfalse
+\IEEEversiontrue
 \newif\ifanon % needed for acks, suppression of authors, etc
-\anonfalse
+\anontrue
 
 
 \ifIEEEversion
@@ -599,7 +599,7 @@ We begin by disposing of scenario S1. In that scenario, the attacker has access 
 
 In summary, we cannot hope to gain any security in scenario S1 by adding more cryptography.
 
-\subsection{Intuition for Formal Security Analysis}
+\subsection{Intuition for Formal Security Analysis}\label{sec:informal}
 
 For scenarios S2, S3 and S4, the picture is much more positive. In the remainder of this section, we introduce a formal security model covering all three scenarios. We work with a simulation-based framework, in contrast to the game-based approach introduced for probabilistic data structures in~\cite{CCS:ClaPatShrPS19}. %We discuss the strengths of our alternative approach in more detail below. 
 
@@ -645,6 +645,8 @@ In the above definition, we quantify over \texttt{insert($\cdot$)} queries (via 
 
 Note that our security analysis using a simulation-based definition does not require us to specify a winning condition for adversary $\mathcal{A}$. Rather, we infer from inspecting the simulator what the adversary can (or cannot) achieve in the ideal world, and show that no efficient algorithm $\mathcal{E}$ can distinguish the real and ideal worlds. This is in contrast to the game-based approach of~\cite{CCS:ClaPatShrPS19} which needs a complex definition to say when the adversary has successfully manipulated a probabilistic data structure. This reveals a strength of the simulation-based approach in more complex settings like ours.
 
+\vspace{0.1cm}
+\noindent\textbf{A specific simulator ${\mathcal{S}}$.}
 We next describe the simulator ${\mathcal{S}}$ that we will use in our further analysis: ${\mathcal{S}}$ operates by running ${\mathcal{A}}$ in a blackbox manner and handling all of its queries as follows: 
 \begin{itemize}
 \item \texttt{init($\cdot$)}: on input $n$, $\ell$, $\alpha_m$, ${\mathcal{S}}$ initialises an HLL sketch as in Figure~\ref{fig:hll}; that is, it creates an array of $m=2^n$ buckets $M[j]$ and initialises them all to 0.
@@ -658,7 +660,8 @@ For our definition to meaningfully capture security against cardinality manipula
 
 We require one further standard definition.
 \begin{definition}
-We define the PRF advantage of an adversary ${{\mathcal{B}}}$ against $F$ outputting a bit $d'$ as being its advantage in distinguishing whether it is interacting with $F$ for a uniformly random key $K$ ($d=0$) or interacting with a truly random function ($d=1$). Thus: 
+Let $F: \{0,1\}^k \times {{\mathcal{D}}} \rightarrow  \{0,1\}^{n+\ell}$.
+We define the PRF advantage of an adversary ${{\mathcal{B}}}$ against $F$ outputting a bit $d'$ as being its advantage in distinguishing whether it is interacting with $F$ for a uniformly random key $K$ ($d=0$) or interacting with a truly random function ($d=1$). We write: 
 \[
 \mbox{Adv}^{\mbox{\tiny PRF}}_{F}({{\mathcal{B}}}) := \lvert 2\Pr[d' = d] - 1 \rvert\,.
 \]
@@ -675,6 +678,8 @@ Let simulator $\mathcal{S}$ be as described above. For any S4 adversary ${\mathc
 \]
 Moreover, if ${\mathcal{A}}$ makes $q$ queries to its \texttt{insert($\cdot$)} oracle, then ${{\mathcal{B}}}$ makes $q$ queries to its real or random oracle. Finally, the running time of ${{\mathcal{B}}}$ is (roughly) $t_{\mathcal{A}}+t_{\mathcal{E}}$.
 \end{theorem}
+
+This result tightly relates the security of HLL-$F$ against cardinality manipulation to that of the PRF security of the function $F$ used in its construction (for the reasons explained in Section~\ref{sec:informal}).
 
 %Informally, if $F$ is a good PRF, then $\mbox{Adv}^{\mbox{\tiny PRF}}_{F}({{\mathcal{B}}})$ should be small for any adversary ${{\mathcal{B}}}$ running in a reasonable amount of time; hence the advantage of any S4 adversary  ${\mathcal{A}}$ against HLL using PRF $F$ is also small. Note that our proof still applies for the improved algorithm of~\cite{hllnew} that is used in Redis. The only changes to the proof are to use the Redis approach for computing responses to \texttt{read} queries in place of the classical HLL approach.
 
