@@ -620,7 +620,7 @@ Why does this proof imply that ${\mathcal{A}}$ cannot manipulate the cardinality
 
 \subsection{Formal Security Model for HLL}
 
-We now formalise the above intuition. Our definitions are specific to HLL-$F$ as the object of analysis, but are easily generalised to any cardinality estimator with the same syntax as HLL-$F$ (formally defined by a triple of algorithms (\texttt{Init}, \texttt{Insert}, \texttt{Read})).
+We now formalise the above intuition. Our definitions are specific to HLL-$F$ as the object of analysis, but are easily generalised to any cardinality estimator with the same syntax as HLL-$F$ (that can be formally defined by a triple of algorithms (\texttt{Init}, \texttt{Insert}, \texttt{Read})).
 
 \vspace{0.2cm}
 \noindent\textbf{The distinguisher ${\mathcal{D}}$ and its advantage.} We consider distinguisher ${\mathcal{D}}$ to be an algorithm running in a security game. The game begins with the selection of a bit $b$ uniformly at random and then runs either adversary ${\mathcal{A}}$ (the real world, $b=0$) or simulator ${\mathcal{S}}$ (the ideal world, $b=1$). Adversary ${\mathcal{A}}$ interacts with up to four oracles which are handled by the game using the algorithms of HLL-$F$. These are defined below; different combinations of oracles define scenarios S2, S3, S4. After making some queries, ${\mathcal{A}}$ returns its output $\textsf{out}_{\mathcal{A}}$ to ${\mathcal{D}}$. Simulator ${\mathcal{S}}$ runs ${\mathcal{A}}$ in a blackbox manner (as specified below) and receives ${\mathcal{A}}$'s output. It then provides its own output $\textsf{out}_{\mathcal{S}}$ to ${\mathcal{D}}$. Finally, ${\mathcal{D}}$ outputs a bit $b'$ estimating whether it is interacting with the real world ($b'=0$) or the ideal world ($b'=1$). For $i=2, 3, 4$, we define ${\mathcal{D}}$'s S$i$-Real-or-Ideal advantage against HLL-$F$ with adversary ${\mathcal{A}}$ and simulator ${\mathcal{S}}$ to be:
@@ -660,11 +660,10 @@ The scheme HLL-$F$ is S$i$-simulation-secure with parameters $(q,t_{\mathcal{S}}
 $\mbox{Adv}^{\mbox{\tiny S$i$-RoI}}_{\mbox{\tiny{HLL-$F$,${\mathcal{A}}$,${\mathcal{S}}$}}}({\mathcal{D}}) \leq \epsilon$. 
 \end{definition}
 
-In the above definition, we quantify over \texttt{insert($\cdot$)} queries (via $q$) and not other types of query because only \texttt{insert($\cdot$)} queries will appear in our concrete security analysis and we do not want to clutter the notation.
+In the above definition, we quantify over \texttt{insert($\cdot$)} queries (via $q$) and not other types of query because only \texttt{insert($\cdot$)} queries will appear in our concrete security analysis and we do not want to clutter the notation. Note also that our definition is given with respect to a \emph{specific} simulator, but could be generalised to allow any simulator that performs random sampling when handling \texttt{insert($\cdot$)} queries.
 
-Note that our security analysis using a simulation-based definition does not require us to specify a winning condition for adversary $\mathcal{A}$. Rather, we infer from inspecting the simulator what the adversary can (or cannot) achieve in the ideal world, and show that no efficient algorithm $\mathcal{D}$ can distinguish the real and ideal worlds. This is in contrast to the game-based approach of~\cite{CCS:ClaPatShrPS19} which needs a complex definition to say when the adversary has successfully manipulated a probabilistic data structure. This reveals a strength of the simulation-based approach.
+Our simulation-based security definition does not require us to specify a winning condition for adversary $\mathcal{A}$. Rather, we infer from inspecting the simulator what the adversary can (or cannot) achieve in the ideal world, and show that no efficient algorithm $\mathcal{D}$ can distinguish the real and ideal worlds. This is in contrast to the game-based approach of~\cite{CCS:ClaPatShrPS19} which needs a complex definition to say when the adversary has successfully manipulated a probabilistic data structure. This reveals a strength of the simulation-based approach.
 
-Note also that our definition is given with respect to a \emph{specific} simulator, but could be generalised to allow any simulator that performs random sampling when handling \texttt{insert($\cdot$)} queries.
 
 Before stating our main result, we require one further standard definition:
 \begin{definition}
