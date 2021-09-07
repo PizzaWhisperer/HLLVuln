@@ -1,8 +1,8 @@
 
 \newif\ifIEEEversion % turn on IEEE style 
-\IEEEversiontrue
+\IEEEversionfalse
 \newif\ifanon % needed for acks, suppression of authors, etc
-\anontrue
+\anonfalse
 
 
 \ifIEEEversion
@@ -78,7 +78,7 @@ mathilde.raynal@epfl.ch}
 \ifanon %% suppress authors in anonymous version
 \author{}
 \else
-\author{Kenneth G. Paterson\\ETH Zurich\\\texttt{kenny.paterson@inf.ethz.ch} \and Mathilde Raynal\\EPFL\\\texttt{mraynal@student.ethz.ch}}
+\author{Kenneth G. Paterson\\ETH Zurich\\\texttt{kenny.paterson@inf.ethz.ch} \and Mathilde Raynal\\EPFL\\\texttt{mathilde.raynal@epfl.ch}}
 \fi % end anon processing of authors 
 \fi % end of vanilla format 
 
@@ -557,8 +557,8 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 \subsection{Results for Redis}
 We also implemented our attacks for the HLL implementation used in Redis as described in Section~\ref{sec:redis}.
 The hash function $h$ is fixed as the 64-bit MurmurHash3 function. The seed used internally is hardcoded and can be extracted by inspection of the openly-available Redis codebase.
-Furthermore, the number of buckets is constant and set to 16,384. Knowledge of theese parameters places us in the setting of an S2 adversary.
-Since a classic Redis application separates the server owning the sketch from the client interacting with the sketch, we consider that the scenarios S3 or S4, while possible, are not typical Redis use case. 
+Furthermore, the number of buckets is constant and set to 16,384. Knowledge of these parameters places us in the setting of an S2 adversary.
+Since a classic Redis application separates the server holding the sketch from the client interacting with the sketch, we consider that attack scenarios S3 or S4, while possible, are not typical for Redis. 
 Thus, we only consider scenario S2 for Redis.
 For simplicity, we set attack parameter $\epsilon$ to $\frac{1}{2}$ in the attack on an initially empty HLL sketch.
 The results are averaged over 30 iterations and reported in Table~\ref{table:tab3}.
