@@ -1,8 +1,8 @@
 
 \newif\ifIEEEversion % turn on IEEE style 
-\IEEEversionfalse
+\IEEEversiontrue
 \newif\ifanon % needed for acks, suppression of authors, etc
-\anonfalse
+\anontrue
 
 
 \ifIEEEversion
@@ -99,7 +99,7 @@ Data scientists today make use of systems like Google Big Query, Apache Spark, P
 However, HLL is increasingly used in settings where adversaries may have incentives to manipulate the cardinality estimates made by the algorithm, i.e.\ HLL is being used in \emph{adversarial settings}. For example:
 \begin{itemize}
     \item Facebook uses HLL to find out how many distinct people visited their website in the past week~\cite{fbhll}.
-    \item Google uses a variant of HLL described in~\cite{hllpractice} in its PowerDrill system (first described in~\cite{HallBBGN12}) and possibly in a variety of other internal systems reported in~\cite{hllpractice}. For example, cardinality estimation is used to to determine the number of distinct search queries on \url{google.com} over a time period~\cite{hllpractice}. %HLL is also used for cardinality estimation via an API in Google Big Query. 
+    \item Google uses a variant of HLL described in~\cite{hllpractice} in its PowerDrill system (first described in~\cite{HallBBGN12}) and possibly in a variety of other internal systems reported in~\cite{hllpractice}. For example, cardinality estimation is used to determine the number of distinct search queries on \url{google.com} over a time period~\cite{hllpractice}. %HLL is also used for cardinality estimation via an API in Google Big Query. 
     \item HLL has been implemented in network soft-switches to approximate the number of distinct packets in traffic flows and overcome the switch memory limits~\cite{flexswitch}. The number of unique flows traversing a switch is then used to  inform a congestion control mechanism.
     \item HLL has been proposed as a solution to detecting Denial-of-Service attacks~\cite{portscanhll} (this paper actually uses a variation on HLL called \emph{sliding HLL}~\cite{slidinghll} which estimates the cardinality over a moving time window). Specifically, HLL is used to count how many different destination ports are seen over all packets received, in an attempt to identify when a port scan attack is underway.
 \end{itemize}
@@ -119,9 +119,6 @@ The rest of the paper is organised as follows. Section~\ref{sec:related} immedia
 
 Desfontaines \emph{et al.}~\cite{cardestprivacy} studied the privacy properties of HLL in two different attack scenarios, referred to as \emph{insider} and \emph{external}. The attack target of~\cite{cardestprivacy} is different from ours, being focused on privacy breaches. %It is argued in~\cite{cardestprivacy} that HLL can be used by organisations to store and process location data, which is inherently sensitive, so losing privacy would leak users' locations and potentially cause great harm. In contrast, we are concerned with an attacker attempting to manipulate the cardinality estimation process itself (an issue not considered in~\cite{cardestprivacy}).
 We discuss the two attack scenarios from~\cite{cardestprivacy} in more detail in Section~\ref{sec:attacks}. 
-%\todo{update: we will get privacy for free from our sim based security model if sim does not use input $x$.}
-
-%In particular, we will show that an adversary who can insert items into the HLL and who can access the HLL cardinality estimate (via typical APIs in HLL implementations) as permitted in the external scenario of~\cite{cardestprivacy} can actually realise the same attacks as the insider adversary can, at least insofar as cardinality estimate manipulation is concerned.
 
 In~\cite{hllvuln}, Reviriego and Ting exploit a vulnerability of HLL to manipulate the cardinality estimate, leading to a five-fold reduction in the estimate compared to the true cardinality. We consider the attack model used in~\cite{hllvuln} to be quite artificial, since it gives the adversary the ability to test whether inserting an item \emph{would} increase the cardinality estimate, without actually having to insert the item. Such a setup might be possible under certain circumstances, for example where the adversary has access to an identical ``shadow'' device; see further discussion in Section~\ref{sec:attacks}. For completeness, we include analyses of this attack scenario, showing that we can drastically improve on the attacks in~\cite{hllvuln} (e.g.\ we can reduce the HLL cardinality estimate by a factor of almost 1,000 instead of the factor of 5 achieved in~\cite{hllvuln}). However, we stress that we consider this scenario to be the least realistic (and therefore the least interesting).
 
@@ -129,9 +126,9 @@ Both~\cite{cardestprivacy,hllvuln} propose mitigations using a salted HLL sketch
 %In addition, our simulation-based security definition, in which the simulator in the ideal world has no access to the inserted values, automatically guarantees confidentiality of the values inserted into the HLL sketch, even in the strongest attack model considered in~\cite{cardestprivacy}. So, while our main objective is to protect against adversarial inputs, we also get privacy for free when using a keyed PRF in place of the HLL hash function. 
 
 Our work relates to the broader study of the performance of probabilistic data structures in adversarial environments.
-Clayton \emph{et al.}~\cite{CCS:ClaPatShrPS19} recently provided a provable-security treatment of this topic. They used a game-based formalism to analyze Bloom filters, counting (Bloom) filters and count-min sketch data structures. They did not study HLL. Our use of a simulation-based security definition in place of the game-based ones used in~\cite{CCS:ClaPatShrPS19} is another point of distinction; see further discussion in Section~\ref{sec:formal}.
-
-Prior work also focused on Bloom filters~\cite{NaorY15,GerbetKL15} or flooding of hash tables~\cite{LiptonN93,CrosbyW03}. References~\cite{GerbetKL15,CCS:ClaPatShrPS19} provide comprehensive summaries of prior work in this area. 
+Clayton \emph{et al.}~\cite{CCS:ClaPatShrPS19} recently provided a provable-security treatment of this topic. They used a game-based formalism to analyze Bloom filters, counting (Bloom) filters and count-min sketch data structures. They did not study HLL. Our use of a simulation-based security definition in place of the game-based ones used in~\cite{CCS:ClaPatShrPS19} is another point of distinction; see further discussion in Section~\ref{sec:formal}. Prior work also focused on Bloom filters~\cite{NaorY15,GerbetKL15} or flooding of hash tables~\cite{LiptonN93,CrosbyW03}. %References~\cite{GerbetKL15,CCS:ClaPatShrPS19} provide summaries of prior work in this area. 
+Recent papers~\cite{Ben-EliezerJWY20,DBLP:journals/corr/abs-2011-07471,HassidimKMMS20,KaplanMNS21} have studied broad classes streaming algorithms under adversarial input from a theoretical viewpoint. Our applied viewpoint complements this work, focussing on the real-world usage of a specific cardinality estimator. 
+%The authors of~\cite{Ben-EliezerJWY20} give a compiler that shows how to generically transform a non-robust streaming algorithm into a robust one in various scenarios. For the particular case of cardinality estimation, this results in solutions that are much less efficient than ours using a PRF; the security model used in this line of work is also weaker than our strongest model.
 
 \section{Overview of HLL}\label{sec:overview}
 
@@ -753,7 +750,7 @@ We have given a formal analysis of using a PRF as a countermeasure to our attack
 \section*{Acknowledgements}
 The work of Paterson is supported in part by a gift from VMware.
 
-The authors thank Dennis Hofheinz and Anupama Unnikrishnan for useful discussions on simulation-based definitions and Tom Shrimpton for suggesting to look at GoogleBigQuery.
+The authors thank Dennis Hofheinz and Anupama Unnikrishnan for useful discussions on simulation-based definitions, Tom Shrimpton for suggesting to look at GoogleBigQuery, and Eylon Yogev for drawing our attention to related work on streaming algorithms with adversarial inputs.
 \fi
 
 \bibliographystyle{ieeetr}
