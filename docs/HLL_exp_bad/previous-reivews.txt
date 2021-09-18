@@ -1,5 +1,5 @@
 
-Reviews and rebuttal from ACM CCS 2021; changes in this submission
+Reviews and author rebuttal from ACM CCS 2021; followed by changes in this submission
 
 Review #147A
 ===========================================================================
@@ -174,7 +174,7 @@ for Redis and Presto.
 
 If one switches to using a keyed PRF, then of course that key has to be protected. If (for example) a keyed version of HLL is implemented on a router and used to monitor network traffic, the attacker can still try to manipulate the traffic; security would then rely on the adversary not being able to extract the key from the router.
 
-Regarding the rigorousness of Section 8: Section 8.2 provides intuition, while Section 8.3 is rigorous. If the referee could point to something specific that they find non-rigorous in Section 8.3, we?d be glad to address it. The reviewer is correct in their intuition for the security proof (except that there is only one fixed hash function, which we replace by a PRF). As we wrote in the introduction: ?.. it is possible to provably secure HLL against cardinality manipulation by the simple expedient of replacing its internal hash function h by a keyed, variable-input-length pseudo-random function (VIL-PRF) ?? ?.
+Regarding the rigorousness of Section 8: Section 8.2 provides intuition, while Section 8.3 is rigorous. If the referee could point to something specific that they find non-rigorous in Section 8.3, we'd be glad to address it. The reviewer is correct in their intuition for the security proof (except that there is only one fixed hash function, which we replace by a PRF). As we wrote in the introduction: "... it is possible to provably secure HLL against cardinality manipulation by the simple expedient of replacing its internal hash function h by a keyed, variable-input-length pseudo-random function (VIL-PRF)".
 
 Regarding the request for a concrete study of Redis: Section 6 gives our analysis and attacks for Redis. Since submission we have implemented our attacks against Redis. See the response to Reviewer A.
 
@@ -186,17 +186,18 @@ Mergeability is trivial when using the same key PRF K in all sketches, similarly
 
 On comparison to related work: we compare our results to [8] in Section 7. We obtain much higher reduction factors (e.g. almost 1000 instead of the 5 reported in [8]), implying that our attack is much better. [10] studies the privacy properties of HLL, and is not concerned with cardinality estimation. So no direct comparison to [10] is possible. We only reuse their adversarial models since we found them to capture interesting sets of adversarial capabilities.
 
-On models: We state that we do not consider S1 to be very realistic but are forced to analyse it since it is used in [8]. We introduce S3 because this is a practical adversarial setting. We don?t have attacks in S3 that are better than those in S2. See the last paragraph of Section 4.3 where this is explained.
+On models: We state that we do not consider S1 to be very realistic but are forced to analyse it since it is used in [8]. We introduce S3 because this is a practical adversarial setting. We don't have attacks in S3 that are better than those in S2. See the last paragraph of Section 4.3 where this is explained.
 
 On list reprocessing in the complex attack: this is identical to the simple attack, and is described above both attacks on p.6. We can clarify this.
 
-Of course the adversary is not given oracle access to the F_k(\cdot)!! If he was, we would be back to the original attack scenarios, and no security would be achievable. And, in general, we don?t give an adversary direct access to underlying primitives used in cryptographic constructions when they are keyed. We have concrete examples in mind and can discuss them in detail with the reviewers.
+Of course the adversary is not given oracle access to the F_k(\cdot)!! If he was, we would be back to the original attack scenarios, and no security would be achievable. And, in general, we don't give an adversary direct access to underlying primitives used in cryptographic constructions when they are keyed. We have concrete examples in mind and can discuss them in detail with the reviewers.
 
 Comment @A1 by Reviewer C
 ---------------------------------------------------------------------------
 We thank the authors for their rebuttal.
 
 After much internal discussion, the reviewers felt that while this paper certainly has merit, it is a bit too narrowly focused for CCS at this point. While pointing out that simple attacks work against real-world systems, as is done here, is important, we felt that the paper needed more discussions of generalizations of the attacks or protections against this class of attacks. We encourage the authors to continue down this exciting line of research and hope they find an appropriate venue for this work.
+
 
 
 Changes in this Euro S&P 2022 submission
