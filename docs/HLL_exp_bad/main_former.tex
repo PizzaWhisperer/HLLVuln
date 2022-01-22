@@ -754,11 +754,11 @@ The authors thank Dennis Hofheinz and Anupama Unnikrishnan for useful discussion
 \fi
 
 \bibliographystyle{ieeetr}
-\bibliography{./ref.bib}
+\bibliography{ref.bib}
 
 \appendix
 
-\subsection{Further analysis of Flexswitches}\label{sec:flexswitch}
+\section{Further analysis of Flexswitches}\label{sec:flexswitch}
 
 Extending our analysis of~\cite{flexswitch} from the main body, \cite[Section 4.2]{flexswitch} proposes using HLL for detecting TCP port scans by counting observed destination port numbers in TCP packets with set SYN flags and reporting a scan event if the estimate exceeds a
 set threshold. Using our attack techniques (specifically, in scenario S2), an attacker could complete a partial port scan of roughly half of all $2^{16}$ ports whilst keeping the HLL estimate below $0.693m$ where $m$ is the number of buckets used in HLL. While~\cite{flexswitch} is not specific about the value of $m$ actually used, the authors' focus on reducing memory usage indicates that $m$ would not be larger than $1024$.\footnote{The paper mentions using 1 byte counters in the buckets and states that using more than 1KB of memory ``only improves average error rates marginally''; we infer a maximum value of $m=1024$ from this.} It is not stated in~\cite{flexswitch} what threshold needs to be crossed to trigger an alarm, but we consider it plausible that it would be above $0.693 \cdot 1024 = 710$. 
@@ -769,7 +769,7 @@ In a more advanced application,~\cite[Section 4.3]{flexswitch} proposes to use H
 
 Similar remarks apply to the treatment of CONGA in~\cite[Section 4.5]{flexswitch}. CONGA is a congestion-aware load balancing system that splits TCP flows into flowlets (collections of IP packets) and allocates them to paths based on congestion feedback from remote switches. In the enhancements to CONGA proposed in~\cite{flexswitch}, HLL is used in the ``flow statistics'' building block for estimating flowlet statistics in switches; these estimates are sent back to a monitoring system and used to determine the load balancing configuration. This overall system can be abused by an S2 adversary, to cause flowlet numbers to be underestimated (or overestimated) and the load balancing to perform sub-optimally. For example, an adversary could cause all the switches to \emph{over}-estimate the number of flowlets they are handling and ask the load balancing system to send less traffic through them. This could result in a degradation in the total amount of traffic the load balancing system can handle (depending on what fail-safe mode it has). Or an attacker could cause all the switches to \emph{under}-estimate the number of flowlets they are handling, causing undetected congestion in the switches.
 
-\subsection{Proof of Theorem 8.1}\label{sec:proof} %ridiculous, but had to hard-code this reference
+\section{Proof of Theorem 8.1}\label{sec:proof} %ridiculous, but had to hard-code this reference
 
 PRF adversary ${{\mathcal{B}}}$ against $F$ is built as follows. Let $d$ denote the hidden bit determining whether ${{\mathcal{B}}}$ receives real responses of the form $F_K(x)$ where $K$ is a uniformly random key ($d=0$) or responses from a truly random function ($d=1$); ${{\mathcal{B}}}$ provides a simulation of either the real or ideal world for distinguisher ${\mathcal{D}}$ as follows. ${{\mathcal{B}}}$ runs ${{\mathcal{A}}}$ and answers each of ${{\mathcal{A}}}$'s queries as follows:
 \begin{itemize}
@@ -783,7 +783,7 @@ When ${\mathcal{A}}$ returns its final output $\textsf{out}_{\mathcal{A}}$, ${{\
 Note that when $d=0$, ${{\mathcal{B}}}$ plays against the real $F$ with a random key $K$ and provides a simulation for ${\mathcal{A}}$ that perfectly instantiates the real world. On the other hand, when $d=1$, ${{\mathcal{B}}}$ plays against a truly random function and perfectly instantiates our simulator $\mathcal{S}$ in the ideal world. To see this, note that sampling the outputs $y$ of a truly random function at distinct inputs $x$ is identical to simply sampling $y$ uniformly at random.\footnote{Our proof relies on the $x$ being distinct, but this is to simplify book-keeping and is without loss of generality.} The equality of advantages in the statement of the theorem now follows immediately. The remainder of the proof follows on counting queries and noting that the HLL sub-algorithms for insertion and computing cardinality are efficient, so ${{\mathcal{B}}}$'s running time due to handling ${\mathcal{A}}$'s queries is not increased significantly compared to that of ${\mathcal{A}}$. The final running time for ${\mathcal{B}}$, namely $t_{\mathcal{A}}+t_{\mathcal{D}}$, follows on noting that ${\mathcal{B}}$ first runs ${\mathcal{A}}$ and then ${\mathcal{D}}$.
 
 
-\subsection{Breaking HLL-UHF}\label{sec:UHF}
+\section{Breaking HLL-UHF}\label{sec:UHF}
 
 In general the key of a UHF may be recovered from a small number of its outputs. Consider, for example, the UHF built from polynomial hashing over a finite field $\mathcal{F}$. Here, inputs $x$ are encoded as polynomials $p_x \in \mathcal{F}(Z)$, the key is a uniformly random field element, and the UHF output $h_K(x)$  is equal to $p_x(K)$, obtained by polynomial evaluation at $K$. The specific translation from $x$ to $p_x$ involves encoding $x$ as a vector $(x_1,x_1,\ldots,x_v) \in \mathcal{F}^v$ for some $v$ and then setting:
 \[
