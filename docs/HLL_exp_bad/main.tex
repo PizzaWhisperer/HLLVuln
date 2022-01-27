@@ -527,34 +527,38 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 
 \begin{table*}[tb!]
 \small\centering
-\caption{Attack results for a classic HLL implementation, averaged over 30 iterations.}
+\caption{Attack results for a classic HLL implementation, averaged over 50 iterations.}
 \medskip
      \makebox[\linewidth]{
-\begin{tabular}{| m{11em} | m{4em} | m{4.2em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
+\begin{tabular}{| m{11em} | m{3.4em} | m{4.8em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
     \hline
     \textbf{Scenario} &  \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S4} \\ \hline
-    \textbf{\# Targeted buckets $B$} & 1 & 100 & n/a & 1 & n/a & 1 \\ \hline
-    \textbf{HLL initially empty?} & yes & yes & no & yes & no & yes \\ \hline
-    \textbf{Original Card. Est.} & 0 & 0 & 1,000 & 0 & 1,005 & 0 \\ \hline
-    \textbf{\# Items added} & 4,096 & 409,595 & 524,288 & 28,566 & 870,320 & 409,595 \\ \hline
-    \textbf{Final Card. Est.} & 1 & 126 & 1,011 & 1 & 1,005 & 1 \\ \hline
+    %\textbf{HLL initially empty?} & yes & yes & yes & no & yes & no \\ \hline
+    \textbf{Original Card. Est.} & 0 & 0 &  0 & 1,001 & 0 & 1,007  \\ \hline
+    \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 & - & 1 & - \\ \hline
+      \textbf{\# Items added} & 4,132 & 523,791  & 4,106 & 524,851 & 4,106 & 857,150 \\ \hline
+     \textbf{Final Card. Est.} & 1 & 177 & 1 & 1,025  & 1 &  1,007 \\ \hline
+    \textbf{\# Resets} & 4,718 & 6,973 & - & - & - & - \\ \hline
+
 \end{tabular}}
 \label{table:tab1}
 \end{table*}
 
 \begin{table*}[tb!]
 \small\centering
-\caption{Attack results for a classic HLL implementation, averaged over 30 iterations, in the setting of~\cite{hllvuln}.}
+\caption{Attack results for a classic HLL implementation, averaged over 50 iterations, in the setting of~\cite{hllvuln}.}
 \medskip
      \makebox[\linewidth]{
-\begin{tabular}{| m{11em} | m{4em} | m{4.2em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
+\begin{tabular}{| m{11em} | m{3.4em} | m{4.8em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
     \hline
     \textbf{Scenario} & \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S4} \\ \hline
-    \textbf{\# Targeted buckets $B$ } & 1 & 100 & n/a & 1 & n/a & 1 \\ \hline
-    \textbf{HLL initially empty?} & yes & yes & no & yes & no & yes \\ \hline
-    \textbf{Original Card. Est.} & 0 & 0 & 1,004 & 0 & 998 & 0 \\ \hline
-    \textbf{\# Items added} & 977 & 97,433 & 124,940 & 979 & 204,669 & 988 \\ \hline
-    \textbf{Final Card. Est.} & 1 & 126 & 1,058 & 1 & 998 & 1 \\ \hline
+    %\textbf{HLL initially empty?} & yes & yes & yes & no & yes & no \\ \hline
+      \textbf{Original Card. Est.} & 0 & 0 & 0 & 1,001 & 0 & 1,003 \\ \hline
+       \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 & - & 1 & - \\ \hline
+     \textbf{\# Items added} & 977 & 125,091 & 980 & 125,153 & 1,003 & 204,127 \\ \hline
+    \textbf{Final Card. Est.} & 1 & 177 & 1 & 1,058  & 1 & 1,003 \\ \hline
+    \textbf{\# Resets} & 1,148 & 1,655 & - & - & - & - \\ \hline
+
 \end{tabular}}
 \label{table:tab2}
 \end{table*}

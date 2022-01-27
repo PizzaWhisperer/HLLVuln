@@ -1,0 +1,15 @@
+(original cardinality estimation, final cardinality estimation, number of items inserted by adversary) for 50 iterations:
+Results in the S1 scenario: 0, 1, 4132, resets: 4718
+Results in the S1 scenario with B = 128: 0, 177, 523791, resets: 6973
+Results in the S2 scenario: 0, 1, 4106
+Results in the S2 scenario with 500 initial items: 532, 645, 524851
+Results in the S2 scenario with 1000 initial items: 1001, 1025, 524851
+Results in the S2 scenario with 2000 initial items: 1972, 1972, 524851
+Results in the S4 scenario with B = 1: 0, 1, 4106
+Results in the S4 scenario with 1000 initial items: 1007, 1007, 857150
+Results in the S1 scenario, RT20 setup, with B = 1: 0, 1, 977, resets: 1148
+Results in the S1 scenario, RT20 setup, with B = 128: 0, 177, 125091, resets: 1655
+Results in the S2 scenario, RT20 setup: 0, 1, 980
+Results in the S2 scenario, RT20 setup, with 1000 initial items: 1001, 1058, 125153
+Results in the S4 scenario, RT20 setup, with B = 1: 0, 1, 1003
+Results in the S4 scenario, RT20 setup, with 1000 initial items: 1003, 1003, 204127
