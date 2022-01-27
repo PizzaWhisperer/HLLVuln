@@ -112,6 +112,10 @@ We stress that none of our attacks are particularly deep in cryptanalytic terms.
 
 To complement our attack results, we provide a formal security analysis of HLL. We show that in the ``shadow device'' attack scenario of~\cite{hllvuln}, no security is possible even if HLL is secretly keyed. On the other hand, we also show that in the most powerful attack setting introduced here, where the attacker has full access to the internals of the HLL algorithm (except for a secret key!), it is possible to provably secure HLL against cardinality manipulation by the simple expedient of replacing its internal hash function $h$ by a keyed, variable-input-length pseudo-random function (VIL-PRF) $F$. We discuss and benchmark a suitable choice for the required VIL-PRF. To support our formal analysis, we introduce a novel simulation-based security model for HLL. We believe our simulation-based approach will be of independent interest and will be useful beyond the analysis of cardinality manipulation attacks, for example when studying privacy properties of HLL and other probabilistic data structures. 
 
+\subsection{Potential Harms and Mitigations}\label{sec-harms}
+
+Our attacks are presented in a general way and evaluated either abstractly or in the context of a specific system described in the scientific literature~\cite{flexswitch}. We also propose an easily deployable countermeasure. Given this, we think the potential for harm to systems and individuals relying on HLL today is small. On the other hand, we hope our results will spur practitioners to consider the possibility of adversarial inputs in their specific applications and design accordingly. For the specific case of Redis, a real system that we analyse in detail, we have contacted the Redis core team and shared our results, following their advertised security policy.\footnote{\url{https://github.com/redis/redis/security/policy}.}
+
 \subsection{Paper Organisation}
 The rest of the paper is organised as follows. Section~\ref{sec:related} immediately below discusses related work. Section~\ref{sec:overview} gives an overview of HLL. Section~\ref{sec:attacks} informally presents our different adversarial models. In Section~\ref{sec:manip}, we describe attacks on HLL and evaluate their impacts under the different adversarial models. Section~\ref{sec:redis} considers the security of the more modern version of HLL due to Ertl~\cite{hllnew} that is used in Redis. Our experimental results are discussed and related back to a specific application setting in Section~\ref{sec:exp}. Section~\ref{sec:formal} provides our formal security model and security proof for HLL using a VIL-PRF. Section~\ref{sec:conclusions} provides our conclusions and ideas for future work.
 
@@ -247,7 +251,7 @@ The S3 and S4 adversaries have stronger capabilities. The access to cardinality 
 
 However, this procedure does not work as simply as just described because of numerical issues that arise in the computation of the cardinality estimate. Specifically, increasing the value held in some bucket from $M[j]$ to $M[j]+1$ \emph{decreases} the denominator in the raw cardinality estimate $\sum_{j=1}^m2^{-M[j]}$ by an amount $2^{-M[j]-1}$. This does lead to a change in the raw cardinality estimate $E = \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}$. However, in practice, the raw cardinality estimate is rounded before being presented to the adversary, so this change may not actually be detectable, especially when $M[j]$ becomes large. We have done experiments which show this to be the case for parameters arising in practice. 
 
-We do not know of attacks which are able to use the extra information available to an S3 adversary over an S2 adversary (namely, the ability to obtain cardinality estimates). Moreover, as we will see below, our attacks in the S2 setting are already quite powerful. For this reason, we will focus in the remainder of the paper on scenarios S1, S2 and S4.
+We only know of one attack setting where the extra power available to an S3 adversary over an S2 adversary (namely, the ability to obtain cardinality estimates) is useful -- see Section~\ref{sec:nonemptyHLLS2}. Moreover, as we will see below, our attacks in the S2 setting are already quite powerful. For this reason, we will focus in the remainder of the paper on scenarios S1, S2 and S4.
 
 %\todo{What did referee say about other attack scenarios we should consider?}
 
@@ -390,25 +394,29 @@ The insertion cost of the attack can be reduced by more cleverly ordering the it
 
 Now we turn to the case where the HLL sketch under attack is not initially empty, but instead contains some honestly inserted items. As usual, the adversary's goal is to insert as many items as possible whilst increasing the cardinality estimate as little as possible. We focus on scenarios S2 and S4, and make brief remarks on S1.
 
-We assume that the target HLL in S2 and S4 has already had sufficiently many items inserted that every one of the $m=2^n$ buckets has counter value $M[j]$ with $M[j] \ge 1$. This is highly likely to be the case (with probability at least $1-1/m^2$) as long as at least $m\ln m$ items have already been inserted into the target HLL. This follows from the standard analysis of the coupon collector problem~\cite[Section 3.6]{MR95} under our usual assumption that $h$ behaves as a random function.
-In S4, the adversary can use its snapshot to detect if this is the case or not, and behave differently if not (details for this case follow below).
+\subsubsection{Initially Non-empty HLL Sketch, Scenario S2}\label{sec:nonemptyHLLS2}
 
-With $m \ln m$ honest insertions, it is also highly likely that the small range correction (Hit Counting algorithm) will not be used, and the target HLL's cardinality estimate will be computed using the raw estimate.
+We assume that at least $2^{t-1}\cdot m\ln m$ items have already been honestly inserted into the target HLL, for some integer $t$ with $1 \leq t \leq \ell$ which will be a parameter of our attack. We assume the S2 adversary somehow knows that this condition holds (e.g.\ through knowledge of when the HLL was initialised and the average rate at which items are inserted into it). Notice that an S3 adversary can use its ability to get cardinality estimates to obtain this knowledge; this is one situation where an S3 adversary can make good use of the extra information available to it as compared to an S2 adversary. In S4, the adversary can use its access to a snapshot to mount a more powerful attack; see Section~\ref{sec:nonemptyHLLS4}. 
+
+Under the condition that at least $2^{t-1}\cdot m\ln m$ items have already been honestly inserted, it is highly likely that every one of the $m=2^n$ buckets has counter value $M[j]$ with $M[j] \ge t$. This follows from an extension of the standard analysis of the coupon collector problem~\cite[Section 3.6]{MR95} under our usual assumption that $h$ behaves as a random function. To see this, note that when an item $x$ is inserted into a specific bucket $j$, the condition $M[j] \ge t$ holds with probability $2^{-t+1}$; we then need about $m\ln m$ such events to occur to ensure the desired condition holds in every bucket. 
+
+With $2^{t-1}m \ln m$ honest insertions, it is also highly likely that the small range correction (Hit Counting algorithm) will not be used, and the target HLL's cardinality estimate will be computed using the raw estimate.
 %\[
 %E = \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}.
 %\]
 
 %We assume the adversary has (or is given) some set of items ${\mathcal{X}}$ that it wishes to insert; as usual, we write $|{\mathcal{X}}| = 2^t$.
 
-\subsubsection{Initially Non-empty HLL Sketch, Scenario S2}\label{sec:nonemptyHLLS2}
-The adversary knows $h$ so it selects items $x$ from ${\mathcal{X}}$ for which the $\ell$ rightmost bits of $h(x)$ start with a ``1'' bit. In this case, since the relevant bucket $j$ already has $M[j] \ge 1$, the bucket's counter is not updated, and the cardinality estimate of the HLL sketch remains unchanged. 
+The S2 adversary knows $h$ so it selects items $x$ from ${\mathcal{X}}$ for which the $\ell$ rightmost bits of $h(x)$ start with up to $t-1$ ``0'' bits. In this case, since the relevant bucket $j$ already has $M[j] \ge t$, the bucket's counter is not updated, and the cardinality estimate of the HLL sketch remains unchanged. 
 
-The adversary then expects to be able to insert half of the items from ${\mathcal{X}}$ into the HLL sketch, without increasing the HLL cardinality estimate at all.
+%% half of hash values begin 1...; 1/4 begin 01 (t=2), etc....
 
-If some buckets are actually empty (but the adversary does not know which ones in the blind setting of S2), then we may expect a moderate increase in the HLL cardinality estimate in the above attack. If the adversary suspects this is the case, then it can first insert $m$ carefully selected items into the target HLL sketch to ensure that $M[j] \ge 1$ for every bucket. This should increase its cardinality estimate by about $m$ (since HLL is a good cardinality estimator!). Then it can mount the attack, and be sure that it does not increase the cardinality estimate any further.
+The S2 adversary then expects to be able to insert a fraction $1-1/2^t$ of the items from ${\mathcal{X}}$ into the HLL sketch, without increasing the HLL cardinality estimate at all. Notice how the fraction increases towards 1 as parameter $t$ increases: the more items are originally in the sketch, the more items the adversary expects to be able to insert without penalty.
+
+If some buckets are actually empty or contain values less than $t$ (but the adversary does not know which ones in the setting of S2), then we may expect an increase in the HLL cardinality estimate in the above attack. If the adversary suspects this is the case, then it can first insert $m$ carefully selected items into the target HLL sketch to ensure that $M[j] \ge t$ for every bucket. This should increase the HLL cardinality estimate to about $\alpha_m 2^t m$. Then it can mount the attack, and be sure that it does not increase the cardinality estimate any further.
 
 \subsubsection{Initially Non-empty HLL Sketch, Scenario S4}\label{sec:nonemptyHLLS4}
-The adversary can adopt the same strategy as for S2, but relax the sampling requirements with the additional information available in this scenario (namely, the count values $M[j]$ per bucket in the HLL sketch). Specifically, it can allow some leading zero bits in the $\ell$ rightmost bits of $h(x)$ so long as this does not increase the current bucket estimate. In other words, if $h(x)$ is mapped to the $j$-th bucket containing $M[j] \ge 0$, then, instead of the strict requirement of having a ``1'' bit in the first position in the $\ell$ rightmost bits of $h(x)$, the adversary is satisfied when there is a ``1'' bit in any of the first $M[j]$ positions in this substring. (A value $M[j]=0$ then never permits insertions, meaning an empty bucket stays empty.) Under these conditions, the estimates in the buckets are never updated, and there is no effect on the cardinality estimate made by HLL.
+The adversary can adopt the same strategy as for S2, but relax the sampling requirements with the additional information available in this scenario (namely, the count values $M[j]$ per bucket in the HLL sketch). Specifically, if $h(x)$ is mapped to the $j$-th bucket containing $M[j] \ge 0$, then the adversary is satisfied when there is a ``1'' bit in any of the first $M[j]$ positions in this substring. (A value $M[j]=0$ then never permits insertions, meaning an empty bucket stays empty.) Under these conditions, the estimates in the buckets are never updated, and there is no effect on the cardinality estimate made by HLL.
 
 We now compute the expected number of elements $x$ from ${\mathcal{X}}$ such that $h(x)$ meets the requirements of the attack.  %We assume that $M[j] \ge 0$ for all buckets $j$. 
 Assume $h(x)$ is mapped to bucket $j$. Inserting $x$ does not increase the cardinality estimate if the rightmost $\ell$ bits of $h(x)$ have $M[j]-1$ or fewer leading zeroes; this probability is equal to $1-\frac{1}{2^{M[j]}}$ assuming $h$ behaves like a random function. Averaging over all $m$ buckets (and using the fact that the bucket choice is uniformly random since the bits of $h$ are independent and uniformly random), the probability that input $x$ meets the requirements of the attack is given by:
@@ -417,11 +425,11 @@ Assume $h(x)$ is mapped to bucket $j$. Inserting $x$ does not increase the cardi
 & = &1 - H_M^{-1} 
 \end{eqnarray*}
 where $H_M$ is the harmonic mean of $2^{M[1]}, 2^{M[2]}, \ldots, 2^{M[m]}$.
-So the adversary can expect to insert a fraction $(1 - H_M^{-1})$ of the items from ${\mathcal{X}}$ without increasing the HLL cardinality estimate at all.
+So the adversary can expect to insert a fraction $1 - H_M^{-1}$ of the items from ${\mathcal{X}}$ without increasing the HLL cardinality estimate at all.
 
 %If some buckets are actually empty (and in S4 the adversary knows which ones using its snapshot), then the above analysis can be reused in order to avoid touching those buckets altogether when inserting elements from ${\mathcal{X}}$. The above analysis does not change at all because the term $\frac{1}{m} \cdot (1-\frac{1}{2^{M[j]}})$ already signs a probability of 0 to inserting $x$ in bucket $j$ if $M[j] = 0$. Hence we still expect to insert $(1 - H_M^{-1}) \cdot 2^t$ items from ${\mathcal{X}}$ without increasing the HLL cardinality estimate at all. Of course, the adversary can relax its attack and allow some of the empty buckets to be hit as well. This would increase the insertion rate at the cost of an increase in the final cardinality estimate. 
 
-In this setting, where the target HLL sketch is initially non-empty, we see that an adversary who has sufficient flexibility in its inputs (as represented by the size of the set ${\mathcal{X}}$) can expect to insert many items into the HLL sketch without increasing the cardinality estimate (or whilst increasing the cardinality estimate slightly in the case where the HLL sketch has some empty buckets in S2). The result is largely independent of the HLL parameters. The more full is the HLL sketch, the larger is $1-H_M^{-1}$ and the easier it is to insert new items without increasing the cardinality estimate.
+In this setting, where the target HLL sketch is initially non-empty, we see that an S4 adversary who has sufficient flexibility in its inputs (as represented by the size of the set ${\mathcal{X}}$) can expect to insert many items into the HLL sketch without increasing the cardinality estimate. The result is largely independent of the HLL parameters. The more full is the HLL sketch, the larger is $1 - H_M^{-1}$ and the easier it is to insert new items without increasing the cardinality estimate.
 
 \subsubsection{Initially Non-empty HLL Sketch, Scenario S1} 
 
@@ -755,9 +763,9 @@ The authors thank Dennis Hofheinz and Anupama Unnikrishnan for useful discussion
 \bibliographystyle{ieeetr}
 \bibliography{./ref.bib}
 
-\appendix
+\appendices
 
-\subsection{Further analysis of Flexswitches}\label{sec:flexswitch}
+\section{Further analysis of Flexswitches}\label{sec:flexswitch}
 
 Extending our analysis of~\cite{flexswitch} from the main body, \cite[Section 4.2]{flexswitch} proposes using HLL for detecting TCP port scans by counting observed destination port numbers in TCP packets with set SYN flags and reporting a scan event if the estimate exceeds a
 set threshold. Using our attack techniques (specifically, in scenario S2), an attacker could complete a partial port scan of roughly half of all $2^{16}$ ports whilst keeping the HLL estimate below $0.693m$ where $m$ is the number of buckets used in HLL. While~\cite{flexswitch} is not specific about the value of $m$ actually used, the authors' focus on reducing memory usage indicates that $m$ would not be larger than $1024$.\footnote{The paper mentions using 1 byte counters in the buckets and states that using more than 1KB of memory ``only improves average error rates marginally''; we infer a maximum value of $m=1024$ from this.} It is not stated in~\cite{flexswitch} what threshold needs to be crossed to trigger an alarm, but we consider it plausible that it would be above $0.693 \cdot 1024 = 710$. 
@@ -768,7 +776,7 @@ In a more advanced application,~\cite[Section 4.3]{flexswitch} proposes to use H
 
 Similar remarks apply to the treatment of CONGA in~\cite[Section 4.5]{flexswitch}. CONGA is a congestion-aware load balancing system that splits TCP flows into flowlets (collections of IP packets) and allocates them to paths based on congestion feedback from remote switches. In the enhancements to CONGA proposed in~\cite{flexswitch}, HLL is used in the ``flow statistics'' building block for estimating flowlet statistics in switches; these estimates are sent back to a monitoring system and used to determine the load balancing configuration. This overall system can be abused by an S2 adversary, to cause flowlet numbers to be underestimated (or overestimated) and the load balancing to perform sub-optimally. For example, an adversary could cause all the switches to \emph{over}-estimate the number of flowlets they are handling and ask the load balancing system to send less traffic through them. This could result in a degradation in the total amount of traffic the load balancing system can handle (depending on what fail-safe mode it has). Or an attacker could cause all the switches to \emph{under}-estimate the number of flowlets they are handling, causing undetected congestion in the switches.
 
-\subsection{Proof of Theorem 8.1}\label{sec:proof} %ridiculous, but had to hard-code this reference
+\section{Proof of Theorem 8.1}\label{sec:proof} %ridiculous, but had to hard-code this reference
 
 PRF adversary ${{\mathcal{B}}}$ against $F$ is built as follows. Let $d$ denote the hidden bit determining whether ${{\mathcal{B}}}$ receives real responses of the form $F_K(x)$ where $K$ is a uniformly random key ($d=0$) or responses from a truly random function ($d=1$); ${{\mathcal{B}}}$ provides a simulation of either the real or ideal world for distinguisher ${\mathcal{D}}$ as follows. ${{\mathcal{B}}}$ runs ${{\mathcal{A}}}$ and answers each of ${{\mathcal{A}}}$'s queries as follows:
 \begin{itemize}
@@ -782,7 +790,7 @@ When ${\mathcal{A}}$ returns its final output $\textsf{out}_{\mathcal{A}}$, ${{\
 Note that when $d=0$, ${{\mathcal{B}}}$ plays against the real $F$ with a random key $K$ and provides a simulation for ${\mathcal{A}}$ that perfectly instantiates the real world. On the other hand, when $d=1$, ${{\mathcal{B}}}$ plays against a truly random function and perfectly instantiates our simulator $\mathcal{S}$ in the ideal world. To see this, note that sampling the outputs $y$ of a truly random function at distinct inputs $x$ is identical to simply sampling $y$ uniformly at random.\footnote{Our proof relies on the $x$ being distinct, but this is to simplify book-keeping and is without loss of generality.} The equality of advantages in the statement of the theorem now follows immediately. The remainder of the proof follows on counting queries and noting that the HLL sub-algorithms for insertion and computing cardinality are efficient, so ${{\mathcal{B}}}$'s running time due to handling ${\mathcal{A}}$'s queries is not increased significantly compared to that of ${\mathcal{A}}$. The final running time for ${\mathcal{B}}$, namely $t_{\mathcal{A}}+t_{\mathcal{D}}$, follows on noting that ${\mathcal{B}}$ first runs ${\mathcal{A}}$ and then ${\mathcal{D}}$.
 
 
-\subsection{Breaking HLL-UHF}\label{sec:UHF}
+\section{Breaking HLL-UHF}\label{sec:UHF}
 
 In general the key of a UHF may be recovered from a small number of its outputs. Consider, for example, the UHF built from polynomial hashing over a finite field $\mathcal{F}$. Here, inputs $x$ are encoded as polynomials $p_x \in \mathcal{F}(Z)$, the key is a uniformly random field element, and the UHF output $h_K(x)$  is equal to $p_x(K)$, obtained by polynomial evaluation at $K$. The specific translation from $x$ to $p_x$ involves encoding $x$ as a vector $(x_1,x_1,\ldots,x_v) \in \mathcal{F}^v$ for some $v$ and then setting:
 \[
