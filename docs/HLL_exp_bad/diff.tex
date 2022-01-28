@@ -1,7 +1,7 @@
 
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL main_former.tex   Fri Jan 21 09:35:27 2022
-%DIF ADD main.tex          Thu Jan 27 10:08:11 2022
+%DIF ADD main.tex          Fri Jan 28 09:35:27 2022
 \newif\ifIEEEversion % turn on IEEE style 
 \IEEEversiontrue
 \newif\ifanon % needed for acks, suppression of authors, etc
@@ -605,18 +605,21 @@ We create an HLL sketch using $n=8$ and hence $m=256$ buckets and, for attacks i
 
 We then challenge the adversary to pick the largest possible number of items to add to the sketch from our set of  $2^{20}$ possible inputs while trying to keep the cardinality estimate as low as possible, in each of the scenarios S1, S2 and S4. 
 
-As a second experiment, and in order to get results that can be compared to the work of~\cite{hllvuln}, we mount our attack in their more restrictive setting: instead of picking from the universe of possible strings, the adversary has to choose what to insert from a set of 250,000 random items that are given to it. Finally, for completeness, we also run the attacks against HLL sketches filled with adversarial inputs only, thus that are initially empty. We vary the value of $B$ in the attack for scenario S1 to demonstrate some of the available trade-offs. For simplicity and to keep the attack as striking as possible, we set $B$ to 1 in the attacks on an initially empty HLL sketch in scenarios S2 and S4. All attacks were run 30 times and we report average outcomes. Our results are reported in Tables~\ref{table:tab1} and~\ref{table:tab2}, which detail the estimated cardinality at the beginning of the attack, the number of items added by the adversary, and the cardinality estimate after adding the adversary's items.
+As a second experiment, and in order to get results that can be compared to the work of~\cite{hllvuln}, we mount our attack in their more restrictive setting: instead of picking from \DIFdelbegin \DIFdel{the universe of possible strings}\DIFdelend \DIFaddbegin \DIFadd{${\mathcal{X}}$}\DIFaddend , the adversary has to choose what to insert from a \DIFdelbegin \DIFdel{set }\DIFdelend \DIFaddbegin \DIFadd{subset }\DIFaddend of 250,000 random items that are given to it. 
+\DIFaddbegin 
+
+\DIFaddend Finally, for completeness, we also run the attacks against HLL sketches filled with adversarial inputs only, thus that are initially empty. We vary the value of $B$ in the attack for scenario S1 to demonstrate some of the available trade-offs. For simplicity and to keep the attack as striking as possible, we set $B$ to 1 in the attacks on an initially empty HLL sketch in scenarios S2 and S4. All attacks were run \DIFdelbegin \DIFdel{30 }\DIFdelend \DIFaddbegin \DIFadd{50 }\DIFaddend times and we report average outcomes. Our results are reported in Tables~\ref{table:tab1} and~\ref{table:tab2}, which detail the estimated cardinality at the beginning of the attack, the number of items added by the adversary, and the cardinality estimate after adding the adversary's items.
 
 These empirical results confirm our analysis on several points.
 
-First, when attacking a sketch already containing 1000 random items, we can see that the adversary is on average able to insert about half of the $2^{20}$ items in our starting set in scenario S2, and about 83\% in scenario S4. The cardinality estimate is, on average, increased slightly in S2 (from 1,000 to 1,011) and remains at the same starting value (1,005 on average) in S4. In both cases, we inserted more than half a million items whilst increasing the cardinality estimate by about $0.1\%$!  These results align well with our theoretical analysis.  
+First, when attacking a sketch already containing 1000 random items, we can see that the adversary is on average able to insert about half of the $2^{20}$ items in our starting set in scenario S2, and about 83\% in scenario S4. The cardinality estimate is, on average, increased slightly in S2 (from 1,\DIFdelbegin \DIFdel{000 }\DIFdelend \DIFaddbegin \DIFadd{001 }\DIFaddend to 1,\DIFdelbegin \DIFdel{011}\DIFdelend \DIFaddbegin \DIFadd{025}\DIFaddend ) and remains at the same starting value (1,\DIFdelbegin \DIFdel{005 }\DIFdelend \DIFaddbegin \DIFadd{007 }\DIFaddend on average) in S4. In both cases, we inserted more than half a million items whilst increasing the cardinality estimate by about \DIFdelbegin \DIFdel{$0.1\%$}\DIFdelend \DIFaddbegin \DIFadd{$0.2\%$}\DIFaddend !  These results align well with our theoretical analysis.  
 %In scenario S1 we run the attack designed for an initially empty target HLL sketch. It performs well in practice, for example, increasing the HLL cardinality estimate from 100 to 126????
 %( $205$'$000 \approx 250'000 \times 0.82 \approx 250$'$000\times(1-\frac{1}{2\times H_c})$, with $H_c\approx\frac{1'000}{256}=3.9$)
 %Here $0.83 \approx (1-\frac{1}{2\cdot H_c})$ with $H_c\approx\frac{1000}{256}=3.9$, so the results are also consistent with our theoretical analysis.
 %% That analysis was now updated -- does it still match?
-Second, when attacking an empty HLL sketch, we can see that in all scenarios, the final cardinality estimate is always exactly a rounded version of the Hit Counting estimator $m \cdot \ln (m/(m-B))$ after inserting a fraction $\frac{B}{m}$ of the items, as predicted by our analysis. For example, in scenario S1 with $B=100$, the final cardinality estimate is 126 (in agreement with the formula) while with $B=1$ in scenarios S2, S4, the final cardinality estimate is just 1 (again, as predicted by the formula).
+Second, when attacking an empty HLL sketch, we can see that in all scenarios, the final cardinality estimate is always exactly a rounded version of the Hit Counting estimator $m \cdot \ln (m/(m-B))$ after inserting a fraction $\frac{B}{m}$ of the items, as predicted by our analysis. For example, in scenario S1 with \DIFdelbegin \DIFdel{$B=100$}\DIFdelend \DIFaddbegin \DIFadd{$B=128$}\DIFaddend , the final cardinality estimate is \DIFdelbegin \DIFdel{126 }\DIFdelend \DIFaddbegin \DIFadd{177 }\DIFaddend (in agreement with the formula) while with $B=1$ in scenarios S2, S4, the final cardinality estimate is just 1 (again, as predicted by the formula).
 
-We can also compare our results from Table~\ref{table:tab2} with results from the attack presented in~\cite[Section 5.1]{hllvuln}. In that paper, the authors target the Redis implementation of HLL and perform the attack against an empty sketch filled with adversarial inputs only. Given a set of 250,000 items, the adversary could choose ``74,390 distinct items and obtain an HLL estimate of only 15,780''~\cite{hllvuln}, achieving a five-fold reduction from the true cardinality after 4 iterations (resets). As explained in Section~\ref{sec:redis}, the Redis implementation analysed in~\cite{hllvuln} does not conform precisely to the original HLL algorithm as presented in Figure~\ref{fig:hll}. Also as discussed in Section~\ref{sec:redis}, the Redis implementation has changed its HLL algorithm several times in recent releases, but the authors of~\cite{hllvuln} do not specify which version was used in their experiments. This makes it difficult to make a precise comparison with the results of~\cite{hllvuln}. Nevertheless, the S1 adversary following our strategy against the classical HLL algorithm is able to add 977 and 97,433 distinct items while holding the cardinality estimate at 1 and 126, respectively. Compared to~\cite{hllvuln}, we can reduce the cardinality estimate by a factor of almost 1,000 instead of 5. This comes at the cost of performing more resets compared to~\cite{hllvuln}. We recall that in practice each reset may cause a delay (for example, it may involve rebooting a network device); we also recall that we consider S1 to be a somewhat artificial attack scenario.
+We can also compare our results from Table~\ref{table:tab2} with results from the attack presented in~\cite[Section 5.1]{hllvuln}. In that paper, the authors target the Redis implementation of HLL and perform the attack against an empty sketch filled with adversarial inputs only. Given a set of 250,000 items, the adversary could choose ``74,390 distinct items and obtain an HLL estimate of only 15,780''~\cite{hllvuln}, achieving a five-fold reduction from the true cardinality after 4 iterations (resets). As explained in Section~\ref{sec:redis}, the Redis implementation analysed in~\cite{hllvuln} does not conform precisely to the original HLL algorithm as presented in Figure~\ref{fig:hll}. Also as discussed in Section~\ref{sec:redis}, the Redis implementation has changed its HLL algorithm several times in recent releases, but the authors of~\cite{hllvuln} do not specify which version was used in their experiments. This makes it difficult to make a precise comparison with the results of~\cite{hllvuln}. Nevertheless, the S1 adversary following our strategy against the classical HLL algorithm is able to add 977 and \DIFdelbegin \DIFdel{97,433 }\DIFdelend \DIFaddbegin \DIFadd{125,091 }\DIFaddend distinct items while holding the cardinality estimate at 1 and \DIFdelbegin \DIFdel{126}\DIFdelend \DIFaddbegin \DIFadd{177}\DIFaddend , respectively. Compared to~\cite{hllvuln}, we can reduce the cardinality estimate by a factor of almost 1,000 instead of 5. This comes at the cost of performing more resets compared to~\cite{hllvuln}. We recall that in practice each reset may cause a delay (for example, it may involve rebooting a network device); we also recall that we consider S1 to be a somewhat artificial attack scenario.
 
 \begin{table*}[tb!]
 \small\centering
@@ -692,22 +695,29 @@ Furthermore, the number of buckets is constant and set to 16,384. Knowledge of t
 Since a classic Redis application separates the server holding the sketch from the client interacting with the sketch, we consider that attack scenarios S3 or S4, while possible, are not typical for Redis. 
 Thus, we only consider scenario S2 for Redis.
 For simplicity, we set attack parameter $\epsilon$ to $\frac{1}{2}$ in the attack on an initially empty HLL sketch.
-The results are averaged over 30 iterations and reported in Table~\ref{table:tab3}.
+The results are averaged over \DIFdelbegin \DIFdel{30 }\DIFdelend \DIFaddbegin \DIFadd{50 }\DIFaddend iterations and reported in Table~\ref{table:tab3}.
 Similarly to the case for classic HLL, our empirical results match with our theoretical analysis.
 
 \begin{table*}[tb!]
 \small\centering
-\caption{Attack results for HLL in Redis, averaged over 30 iterations.}
+\caption{Attack results for HLL in Redis, averaged over \DIFdelbeginFL \DIFdelFL{30 }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{50 }\DIFaddendFL iterations.}
 \medskip
      \makebox[\linewidth]{
 \begin{tabular}{| m{11em} | m{4em} | m{4.2em} |}
     \hline
     \textbf{Scenario} &  \multicolumn{2}{c|}{S2} \\ \hline
-    \textbf{$\epsilon$} & n/a & 0.5 \\ \hline
-    \textbf{HLL initially empty?} & no & yes \\ \hline
-    \textbf{Original Card. Est.} & 70,140 & 0 \\ \hline
-    \textbf{\# Items added} & 524,455 & 524,275 \\ \hline
-    \textbf{Final Card. Est.} & 73,249 & 13,188 \\ \hline
+    \DIFdelbeginFL \textbf{\DIFdelFL{$\epsilon$}} %DIFAUXCMD
+\DIFdelendFL %DIF > \textbf{HLL initially empty?} & no & yes \\ \hline
+    \DIFaddbeginFL \textbf{\DIFaddFL{Original Card. Est.}} \DIFaddendFL & \DIFdelbeginFL \DIFdelFL{n/a }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{0 }\DIFaddendFL & \DIFdelbeginFL \DIFdelFL{0.5 }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{139,967 }\DIFaddendFL \\ \hline
+     \DIFdelbeginFL \textbf{\DIFdelFL{HLL initially empty?}} %DIFAUXCMD
+\DIFdelendFL \DIFaddbeginFL \textbf{\DIFaddFL{$\epsilon$}} \DIFaddendFL &  \DIFdelbeginFL \DIFdelFL{no }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{0.5 }\DIFaddendFL & \DIFdelbeginFL \DIFdelFL{yes }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{- }\DIFaddendFL \\ \hline
+    \DIFdelbeginFL \textbf{\DIFdelFL{Original Card. Est.}} %DIFAUXCMD
+%DIFDELCMD < & %%%
+\DIFdelFL{70,140 }%DIFDELCMD < & %%%
+\DIFdelFL{0 }%DIFDELCMD < \\ \hline
+%DIFDELCMD <     %%%
+\DIFdelendFL \textbf{\# Items added} & 524,\DIFdelbeginFL \DIFdelFL{455 }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{210 }\DIFaddendFL & 524,\DIFdelbeginFL \DIFdelFL{275 }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{454}\DIFaddendFL \\ \hline
+    \textbf{Final Card. Est.} & \DIFdelbeginFL \DIFdelFL{73}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{13}\DIFaddendFL ,\DIFdelbeginFL \DIFdelFL{249 }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{185 }\DIFaddendFL & \DIFdelbeginFL \DIFdelFL{13}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{139}\DIFaddendFL ,\DIFdelbeginFL \DIFdelFL{188 }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{967 }\DIFaddendFL \\ \hline
 \end{tabular}}
 \label{table:tab3}
 \end{table*}
