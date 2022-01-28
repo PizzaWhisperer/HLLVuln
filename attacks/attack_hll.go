@@ -244,6 +244,41 @@ func AttackS2(hll *hyperloglog.HyperLogLog, m int, hllHash hash.Hash32, RT20 boo
 	return inserted
 }
 
+//Additional attack strategy in the S2 scenario when the adversary has information on the preload
+func AttackS2Preload(hll *hyperloglog.HyperLogLog, m int, hllHash hash.Hash32, RT20 bool, B uint32, T uint8) int {
+	inserted := 0
+	items := rand.Perm(maxValue)
+	if RT20 {
+		items = items[:250000]
+	}
+
+	// 0 < T < 24, in "normal" attack, T == 1
+	mask := GenMask(T)
+
+	emptyBool := hll.Count() == 0
+
+	for _, i := range items {
+
+		_, err := hllHash.Write(itob(i))
+		if err != nil {
+			fmt.Printf("Hash error: err %v\n", err)
+			continue
+		}
+		result := hllHash.Sum32()
+		bucket := (result & uint32(((1<<8)-1)<<24)) >> 24
+
+		if (emptyBool && bucket < B) || (!emptyBool && (result&mask != 0)) {
+			//There is a leading 1, or in case of empty sketch, to targeted bucket.
+			hll.Add(hllHash)
+			inserted++
+		}
+
+		hllHash.Reset()
+	}
+
+	return inserted
+}
+
 //Attack in the S4 scenario as described in the paper
 func AttackS4(hll *hyperloglog.HyperLogLog, m int, hllHash hash.Hash32, RT20 bool, B uint32) int {
 	inserted := 0
