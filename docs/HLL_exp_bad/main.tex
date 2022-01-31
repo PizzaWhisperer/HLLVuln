@@ -527,43 +527,93 @@ Second, when attacking an empty HLL sketch, we can see that in all scenarios, th
 
 We can also compare our results from Table~\ref{table:tab2} with results from the attack presented in~\cite[Section 5.1]{hllvuln}. In that paper, the authors target the Redis implementation of HLL and perform the attack against an empty sketch filled with adversarial inputs only. Given a set of 250,000 items, the adversary could choose ``74,390 distinct items and obtain an HLL estimate of only 15,780''~\cite{hllvuln}, achieving a five-fold reduction from the true cardinality after 4 iterations (resets). As explained in Section~\ref{sec:redis}, the Redis implementation analysed in~\cite{hllvuln} does not conform precisely to the original HLL algorithm as presented in Figure~\ref{fig:hll}. Also as discussed in Section~\ref{sec:redis}, the Redis implementation has changed its HLL algorithm several times in recent releases, but the authors of~\cite{hllvuln} do not specify which version was used in their experiments. This makes it difficult to make a precise comparison with the results of~\cite{hllvuln}. Nevertheless, the S1 adversary following our strategy against the classical HLL algorithm is able to add 977 and 125,091 distinct items while holding the cardinality estimate at 1 and 177, respectively. Compared to~\cite{hllvuln}, we can reduce the cardinality estimate by a factor of almost 1,000 instead of 5. This comes at the cost of performing more resets compared to~\cite{hllvuln}. We recall that in practice each reset may cause a delay (for example, it may involve rebooting a network device); we also recall that we consider S1 to be a somewhat artificial attack scenario.
 
-\begin{table*}[tb!]
-\small\centering
-\caption{Attack results for a classic HLL implementation, averaged over 50 iterations.}
-\medskip
-     \makebox[\linewidth]{
-\begin{tabular}{| m{11em} | m{3.4em} | m{4.8em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
-    \hline
-    \textbf{Scenario} &  \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S4} \\ \hline
-    %\textbf{HLL initially empty?} & yes & yes & yes & no & yes & no \\ \hline
-    \textbf{Original Card. Est.} & 0 & 0 &  0 & 1,001 & 0 & 1,007  \\ \hline
-    \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 & - & 1 & - \\ \hline
-      \textbf{\# Items added} & 4,132 & 523,791  & 4,106 & 524,851 & 4,106 & 857,150 \\ \hline
-     \textbf{Final Card. Est.} & 1 & 177 & 1 & 1,025  & 1 &  1,007 \\ \hline
-    \textbf{\# Resets} & 4,718 & 6,973 & - & - & - & - \\ \hline
-
-\end{tabular}}
+\begin{table*}[htp]
+\caption{Attacks on empty sketches for a classic HLL implementation, averaged over 50 iterations.}
+\begin{center}
+\begin{tabular}{| l | >{\raggedleft\arraybackslash}p{5em} | >{\raggedleft\arraybackslash}p{5em} | >{\raggedleft\arraybackslash}p{5em} | >{\raggedleft\arraybackslash}p{5em} |}
+	\hline
+	\textbf{Scenario} &  \multicolumn{2}{c|}{S1} & S2 & S4  \\ \hline
+	\textbf{Original Card. Est.} & 0 & 0 &  0  & 0   \\ \hline
+	\textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 &  1 \\ \hline
+	\textbf{\# Items added} & 4,132 & 523,791  & 4,106 & 4,106 \\ \hline
+	\textbf{Final Card. Est.} & 1 & 177 & 1  & 1 \\ \hline
+	\textbf{\# Resets} & 4,718 & 6,973 & - & - \\ \hline
+\end{tabular}
+\end{center}
 \label{table:tab1}
-\end{table*}
+\end{table*}%
+
+
+%\begin{table*}[tb!]
+%\small\centering
+%\caption{Original Table: Attacks on empty sketches for a classic HLL implementation, averaged over 50 iterations.}
+%\medskip
+%     \makebox[\linewidth]{
+%\begin{tabular}{| m{11em} | m{3.4em} | m{4.8em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
+%    \hline
+%    \textbf{Scenario} &  \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S4} \\ \hline
+%    %\textbf{HLL initially empty?} & yes & yes & yes & no & yes & no \\ \hline
+%    \textbf{Original Card. Est.} & 0 & 0 &  0 & 1,001 & 0 & 1,007  \\ \hline
+%    \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 & - & 1 & - \\ \hline
+%      \textbf{\# Items added} & 4,132 & 523,791  & 4,106 & 524,851 & 4,106 & 857,150 \\ \hline
+%     \textbf{Final Card. Est.} & 1 & 177 & 1 & 1,025  & 1 &  1,007 \\ \hline
+%    \textbf{\# Resets} & 4,718 & 6,973 & - & - & - & - \\ \hline
+%
+%\end{tabular}}
+%\label{table:tab1bis}
+%\end{table*}
 
 \begin{table*}[tb!]
-\small\centering
-\caption{Attack results for a classic HLL implementation, averaged over 50 iterations, in the setting of~\cite{hllvuln}.}
-\medskip
-     \makebox[\linewidth]{
-\begin{tabular}{| m{11em} | m{3.4em} | m{4.8em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
+\caption{Comparison of attack results in the S1 adversarial scenario, in the setting of~\cite{hllvuln}.}
+\begin{center}
+\begin{tabular}{| l | >{\raggedleft\arraybackslash}p{6.8em} | >{\raggedleft\arraybackslash}p{6.8em} | >{\raggedleft\arraybackslash}p{6.8em} |}
     \hline
-    \textbf{Scenario} & \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S4} \\ \hline
-    %\textbf{HLL initially empty?} & yes & yes & yes & no & yes & no \\ \hline
-      \textbf{Original Card. Est.} & 0 & 0 & 0 & 1,001 & 0 & 1,003 \\ \hline
-       \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 & - & 1 & - \\ \hline
-     \textbf{\# Items added} & 977 & 125,091 & 980 & 125,153 & 1,003 & 204,127 \\ \hline
-    \textbf{Final Card. Est.} & 1 & 177 & 1 & 1,058  & 1 & 1,003 \\ \hline
-    \textbf{\# Resets} & 1,148 & 1,655 & - & - & - & - \\ \hline
+    \textbf{Attack} & \multicolumn{2}{c|}{Ours} & ~\cite{hllvuln} \\ \hline
+      \textbf{Original Card. Est.} & 0 & 0 & 0  \\ \hline
+       \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & - \\ \hline
+     \textbf{\# Items added} & 977 & 125,091 & 74,390 \\ \hline
+    \textbf{Final Card. Est.} & 1 & 177 &  15,780 \\ \hline
+    \textbf{\# Resets} & 1,148 & 1,655 & 3 \\ \hline
 
-\end{tabular}}
+\end{tabular}
+\end{center}
 \label{table:tab2}
 \end{table*}
+
+
+\begin{figure*}[htp]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \caption{Attack results as function of t in the S2 scenario.}
+        \includegraphics[width=0.9\textwidth]{figures/graph_S2.pdf}
+    \end{minipage}\hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \caption{Attack results as function of t in the S4 scenario.}
+        \includegraphics[width=0.9\textwidth]{figures/graph_S4.pdf} % second figure itself
+     \end{minipage}
+    \label{fig:graphs}
+\end{figure*}
+
+%\begin{table*}[tb!]
+%\small\centering
+%\caption{Original Table: Attack results for a classic HLL implementation, averaged over 50 iterations, in the setting of~\cite{hllvuln}.}
+%\medskip
+%     \makebox[\linewidth]{
+%\begin{tabular}{| m{11em} | m{3.4em} | m{4.8em} | m{4.1em} | m{4.1em} | m{4.1em} | m{4em} |}
+%    \hline
+%    \textbf{Scenario} & \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S4} \\ \hline
+%    %\textbf{HLL initially empty?} & yes & yes & yes & no & yes & no \\ \hline
+%      \textbf{Original Card. Est.} & 0 & 0 & 0 & 1,001 & 0 & 1,003 \\ \hline
+%       \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 & - & 1 & - \\ \hline
+%     \textbf{\# Items added} & 977 & 125,091 & 980 & 125,153 & 1,003 & 204,127 \\ \hline
+%    \textbf{Final Card. Est.} & 1 & 177 & 1 & 1,058  & 1 & 1,003 \\ \hline
+%    \textbf{\# Resets} & 1,148 & 1,655 & - & - & - & - \\ \hline
+%
+%\end{tabular}}
+%\label{table:tab2bis}
+%\end{table*}
 
 \subsection{Results for Redis}
 We also implemented our attacks for the HLL implementation used in Redis as described in Section~\ref{sec:redis}.
@@ -576,10 +626,8 @@ The results are averaged over 50 iterations and reported in Table~\ref{table:tab
 Similarly to the case for classic HLL, our empirical results match with our theoretical analysis.
 
 \begin{table*}[tb!]
-\small\centering
+\begin{center}
 \caption{Attack results for HLL in Redis, averaged over 50 iterations.}
-\medskip
-     \makebox[\linewidth]{
 \begin{tabular}{| m{11em} | m{4em} | m{4.2em} |}
     \hline
     \textbf{Scenario} &  \multicolumn{2}{c|}{S2} \\ \hline
@@ -588,7 +636,8 @@ Similarly to the case for classic HLL, our empirical results match with our theo
      \textbf{$\epsilon$} &  0.5 & - \\ \hline
     \textbf{\# Items added} & 524,210 & 524,454\\ \hline
     \textbf{Final Card. Est.} & 13,185 & 139,967 \\ \hline
-\end{tabular}}
+\end{tabular}
+\end{center}
 \label{table:tab3}
 \end{table*}
 %\todo[inline]{Results from Redis or GBQ if we get them.}

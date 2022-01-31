@@ -22,7 +22,8 @@ func main() {
 	fmt.Printf("(original cardinality estimation, final cardinality estimation, number of items inserted by adversary) for %d iterations:\n", iterations)
 
 	//S1 scenario
-	var originalEst, finalEst, nItermInserted, nResets int
+	var originalEst, finalEst, nItermInserted int
+	/**
 
 	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", 0, false, 1)
 	fmt.Printf("Results in the S1 scenario: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
@@ -51,6 +52,27 @@ func main() {
 
 	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 1000, false, 1)
 	fmt.Printf("Results in the S4 scenario with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	**/
+
+	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1500, false, 1)
+	fmt.Printf("Results in the S2 scenario with 1500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+
+	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 10000, false, 1)
+	fmt.Printf("Results in the S2 scenario with 10000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+
+	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 15000, false, 1)
+	fmt.Printf("Results in the S2 scenario with 15000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+
+	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 1500, false, 1)
+	fmt.Printf("Results in the S4 scenario with 1500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+
+	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 10000, false, 1)
+	fmt.Printf("Results in the S4 scenario with 10000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+
+	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 15000, false, 1)
+	fmt.Printf("Results in the S4 scenario with 15000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+
+	/**
 
 	//Setup of RT20
 
@@ -71,6 +93,7 @@ func main() {
 
 	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 1000, true, 1)
 	fmt.Printf("Results in the S4 scenario, RT20 setup, with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	**/
 
 }
 
