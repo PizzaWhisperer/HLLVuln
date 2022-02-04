@@ -15,7 +15,7 @@ import (
 var n = uint8(8)
 var m = 1 << n
 var maxValue = int(math.Pow(2, 20)) - 1
-var iterations = 100
+var iterations = 50
 
 var defaultB = uint32(1)
 var defaultT = uint8(1)
@@ -26,30 +26,27 @@ func main() {
 	fmt.Printf("(original cardinality estimation, final cardinality estimation, number of items inserted by adversary) for %d iterations:\n", iterations)
 
 	//S1 scenario
-	var originalEst, finalEst, nItermInserted, expected int
-	/**
+	var originalEst, finalEst, nItermInserted, expected, nResets int
 
-		originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, defaultB, defaultT)
-		fmt.Printf("Results in the S1 scenario: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
+	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, defaultB, defaultT)
+	fmt.Printf("Results in the S1 scenario: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
 
-		originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, uint32(m/2), defaultT)
-		fmt.Printf("Results in the S1 scenario with B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
+	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, uint32(m/2), defaultT)
+	fmt.Printf("Results in the S1 scenario with B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
 
-		//S2 scenario
+	//S2 scenario
 
-		originalEst, finalEst, nItermInserted, _ = runAttack("S2", empty, false, defaultB, defaultT)
-		fmt.Printf("Results in the S2 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	originalEst, finalEst, nItermInserted, _ = runAttack("S2", empty, false, defaultB, defaultT)
+	fmt.Printf("Results in the S2 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
-		originalEst, finalEst, nItermInserted, _ = runAttack("S2", 500, false, defaultB, defaultT)
-		fmt.Printf("Results in the S2 scenario with 500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 500, false, defaultB, defaultT)
+	fmt.Printf("Results in the S2 scenario with 500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
-		originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1000, false, defaultB, defaultT)
-		fmt.Printf("Results in the S2 scenario with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1000, false, defaultB, defaultT)
+	fmt.Printf("Results in the S2 scenario with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
-		originalEst, finalEst, nItermInserted, _ = runAttack("S2", 2000, false, defaultB, defaultT)
-		fmt.Printf("Results in the S2 scenario with 2000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	**/
+	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 2000, false, defaultB, defaultT)
+	fmt.Printf("Results in the S2 scenario with 2000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
 	// S2 Preload
 
@@ -57,8 +54,6 @@ func main() {
 	for t := float64(1); t < 11; t++ {
 		kmlogm = append(kmlogm, int(math.Pow(2, t-1)*float64(m)*math.Log(float64(m))))
 	}
-
-	fmt.Printf("list: %v", kmlogm)
 
 	for i, val := range kmlogm {
 		originalEst, finalEst, nItermInserted, _ = runAttack("S2Preload", val, false, defaultB, uint8(i+1))
@@ -68,16 +63,13 @@ func main() {
 
 	//S4
 
-	/**originalEst, finalEst, nItermInserted, _ = runAttack("S4", empty, false, defaultB, defaultT)
-		fmt.Printf("Results in the S4 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-	**/
+	originalEst, finalEst, nItermInserted, _ = runAttack("S4", empty, false, defaultB, defaultT)
+	fmt.Printf("Results in the S4 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
 	for i, val := range kmlogm {
 		originalEst, finalEst, nItermInserted, expected = runAttack("S4", val, false, defaultB, defaultT)
 		fmt.Printf("Results in the S4 scenario with t = %d: %d, %d, %d, %d\n", i+1, originalEst, finalEst, nItermInserted, expected)
 	}
-
-	/**
 
 	//Setup of RT20
 
@@ -86,7 +78,6 @@ func main() {
 
 	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, true, uint32(m/2), defaultT)
 	fmt.Printf("Results in the S1 scenario, RT20 setup, with B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
-	**/
 
 }
 
