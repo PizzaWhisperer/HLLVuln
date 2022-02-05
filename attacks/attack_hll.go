@@ -23,30 +23,23 @@ var empty = 0
 
 func main() {
 
-	fmt.Printf("(original cardinality estimation, final cardinality estimation, number of items inserted by adversary) for %d iterations:\n", iterations)
+	fmt.Printf("For %d iterations:\n", iterations)
 
 	//S1 scenario
-	var originalEst, finalEst, nItermInserted, expected, nResets int
+
+	fmt.Printf("S1 Scenario: (original, final, number of items inserted, number of resets)\n")
+	var originalEst, finalEst, nItermInserted, nResets, expected int
 
 	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, defaultB, defaultT)
-	fmt.Printf("Results in the S1 scenario: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
+	fmt.Printf("Empty sketch, B = 1: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
 
 	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, uint32(m/2), defaultT)
-	fmt.Printf("Results in the S1 scenario with B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
+	fmt.Printf("Empty sketch, B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
 
 	//S2 scenario
-
+	fmt.Printf("S2 Scenario: (original, final, number of items inserted)\n")
 	originalEst, finalEst, nItermInserted, _ = runAttack("S2", empty, false, defaultB, defaultT)
-	fmt.Printf("Results in the S2 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 500, false, defaultB, defaultT)
-	fmt.Printf("Results in the S2 scenario with 500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1000, false, defaultB, defaultT)
-	fmt.Printf("Results in the S2 scenario with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 2000, false, defaultB, defaultT)
-	fmt.Printf("Results in the S2 scenario with 2000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	fmt.Printf("Empty sketch, B = 1: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
 	// S2 Preload
 
@@ -57,18 +50,17 @@ func main() {
 
 	for i, val := range kmlogm {
 		originalEst, finalEst, nItermInserted, _ = runAttack("S2Preload", val, false, defaultB, uint8(i+1))
-		increase := finalEst - originalEst
-		fmt.Printf("Results in the S2 scenario with t = %d: %d, %d\n", i+1, increase, nItermInserted)
+		fmt.Printf("t = %d: %d, %d, %d\n", i+1, originalEst, finalEst, nItermInserted)
 	}
 
 	//S4
-
+	fmt.Printf("S4 Scenario: (original, final, number of items inserted, expected fraction to insert)\n")
 	originalEst, finalEst, nItermInserted, _ = runAttack("S4", empty, false, defaultB, defaultT)
-	fmt.Printf("Results in the S4 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	fmt.Printf("Empty sketch: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
 	for i, val := range kmlogm {
 		originalEst, finalEst, nItermInserted, expected = runAttack("S4", val, false, defaultB, defaultT)
-		fmt.Printf("Results in the S4 scenario with t = %d: %d, %d, %d, %d\n", i+1, originalEst, finalEst, nItermInserted, expected)
+		fmt.Printf("t = %d: %d, %d, %d, %d\n", i+1, originalEst, finalEst, nItermInserted, expected)
 	}
 
 	//Setup of RT20
