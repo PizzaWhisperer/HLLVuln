@@ -400,7 +400,7 @@ We assume that at least $2^{t-1}\cdot m\ln m$ items have already been honestly i
 
 Under the condition that at least $2^{t-1}\cdot m\ln m$ items have already been honestly inserted, it is highly likely that every one of the $m=2^n$ buckets has counter value $M[j]$ with $M[j] \ge t$. This follows from an extension of the standard analysis of the coupon collector problem~\cite[Section 3.6]{MR95} under our usual assumption that $h$ behaves as a random function. To see this, note that when an item $x$ is inserted into a specific bucket $j$, the condition $M[j] \ge t$ holds with probability $2^{-t+1}$; we then need about $m\ln m$ such events to occur to ensure the desired condition holds in every bucket. 
 
-With $2^{t-1}m \ln m$ honest insertions, it is also highly likely that the small range correction (Hit Counting algorithm) will not be used, and the target HLL's cardinality estimate will be computed using the raw estimate.
+With $2^{t-1}\cdot m \ln m$ honest insertions, it is also highly likely that the small range correction (Hit Counting algorithm) will not be used, and the target HLL's cardinality estimate will be computed using the raw estimate.
 %\[
 %E = \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}.
 %\]
@@ -534,7 +534,7 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
 	\hline
 	\textbf{Scenario} &  \multicolumn{2}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c|}{S4}  \\ \hline
 	\textbf{Original Card. Est.} & 0 & 0 &  0  & 0   \\ \hline
-	\textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & 1 &  1 \\ \hline
+	\textbf{\# Targeted buckets $B$} & 1 & 128 ($m/2$) & 1 &  1 \\ \hline
 	\textbf{\# Items added} & 4,132 & 523,791  & 4,106 & 4,106 \\ \hline
 	\textbf{Final Card. Est.} & 1 & 177 & 1  & 1 \\ \hline
 	\textbf{\# Resets} & 4,718 & 6,973 & - & - \\ \hline
@@ -570,7 +570,7 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
     \hline
     \textbf{Attack} & \multicolumn{2}{c|}{Ours} &\multicolumn{1}{c|}{~\cite{hllvuln}} \\ \hline
       \textbf{Original Card. Est.} & 0 & 0 & 0  \\ \hline
-       \textbf{\# Targeted buckets $B$} & 1 & 128 (= m/2) & - \\ \hline
+       \textbf{\# Targeted buckets $B$} & 1 & 128 ($m/2$) & - \\ \hline
      \textbf{\# Items added} & 977 & 125,091 & 74,390 \\ \hline
     \textbf{Final Card. Est.} & 1 & 177 &  15,780 \\ \hline
     \textbf{\# Resets} & 1,148 & 1,655 & 3 \\ \hline
@@ -585,12 +585,12 @@ We can also compare our results from Table~\ref{table:tab2} with results from th
     \centering
     \begin{minipage}{0.45\textwidth}
         \centering
-        \caption{Attack results as function of t in the S2 scenario.}
+        \caption{Attack results as function of t in scenario S2 with initially non-empty HLL sketch.}
         \includegraphics[width=0.9\textwidth]{figures/graph_S2.pdf}
     \end{minipage}\hfill
     \begin{minipage}{0.45\textwidth}
         \centering
-        \caption{Attack results as function of t in the S4 scenario.}
+        \caption{Attack results as function of t in scenario S4 with initially non-empty HLL sketch.}
         \includegraphics[width=0.9\textwidth]{figures/graph_S4.pdf} % second figure itself
      \end{minipage}
     \label{fig:graphs}
