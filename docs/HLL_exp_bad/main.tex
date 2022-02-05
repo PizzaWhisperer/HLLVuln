@@ -400,7 +400,7 @@ We assume that at least $2^{t-1}\cdot m\ln m$ items have already been honestly i
 
 Under the condition that at least $2^{t-1}\cdot m\ln m$ items have already been honestly inserted, it is highly likely that every one of the $m=2^n$ buckets has counter value $M[j]$ with $M[j] \ge t$. This follows from an extension of the standard analysis of the coupon collector problem~\cite[Section 3.6]{MR95} under our usual assumption that $h$ behaves as a random function. To see this, note that when an item $x$ is inserted into a specific bucket $j$, the condition $M[j] \ge t$ holds with probability $2^{-t+1}$; we then need about $m\ln m$ such events to occur to ensure the desired condition holds in every bucket. 
 
-With $2^{t-1}m \ln m$ honest insertions, it is also highly likely that the small range correction (Hit Counting algorithm) will not be used, and the target HLL's cardinality estimate will be computed using the raw estimate.
+With $2^{t-1}\cdot m \ln m$ honest insertions, it is also highly likely that the small range correction (Hit Counting algorithm) will not be used, and the target HLL's cardinality estimate will be computed using the raw estimate.
 %\[
 %E = \alpha_mm^2\cdot(\sum_{j=1}^m2^{-M[j]})^{-1}.
 %\]
