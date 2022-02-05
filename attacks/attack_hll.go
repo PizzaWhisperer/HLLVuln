@@ -15,90 +15,83 @@ import (
 var n = uint8(8)
 var m = 1 << n
 var maxValue = int(math.Pow(2, 20)) - 1
-var iterations = 50
+var iterations = 100
+
+var defaultB = uint32(1)
+var defaultT = uint8(1)
+var empty = 0
 
 func main() {
 
 	fmt.Printf("(original cardinality estimation, final cardinality estimation, number of items inserted by adversary) for %d iterations:\n", iterations)
 
 	//S1 scenario
-	var originalEst, finalEst, nItermInserted int
+	var originalEst, finalEst, nItermInserted, expected int
 	/**
 
-	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", 0, false, 1)
-	fmt.Printf("Results in the S1 scenario: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
+		originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, defaultB, defaultT)
+		fmt.Printf("Results in the S1 scenario: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
 
-	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", 0, false, uint32(m/2))
-	fmt.Printf("Results in the S1 scenario with B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
+		originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, false, uint32(m/2), defaultT)
+		fmt.Printf("Results in the S1 scenario with B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
 
-	//S2 scenario
+		//S2 scenario
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 0, false, 1)
-	fmt.Printf("Results in the S2 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+		originalEst, finalEst, nItermInserted, _ = runAttack("S2", empty, false, defaultB, defaultT)
+		fmt.Printf("Results in the S2 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 500, false, 1)
-	fmt.Printf("Results in the S2 scenario with 500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+		originalEst, finalEst, nItermInserted, _ = runAttack("S2", 500, false, defaultB, defaultT)
+		fmt.Printf("Results in the S2 scenario with 500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1000, false, 1)
-	fmt.Printf("Results in the S2 scenario with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+		originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1000, false, defaultB, defaultT)
+		fmt.Printf("Results in the S2 scenario with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 2000, false, 1)
-	fmt.Printf("Results in the S2 scenario with 2000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+		originalEst, finalEst, nItermInserted, _ = runAttack("S2", 2000, false, defaultB, defaultT)
+		fmt.Printf("Results in the S2 scenario with 2000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 
-	//S4 scenario
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 0, false, 1)
-	fmt.Printf("Results in the S4 scenario with B = 1: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 1000, false, 1)
-	fmt.Printf("Results in the S4 scenario with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 	**/
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1500, false, 1)
-	fmt.Printf("Results in the S2 scenario with 1500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	// S2 Preload
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 10000, false, 1)
-	fmt.Printf("Results in the S2 scenario with 10000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	kmlogm := []int{}
+	for t := float64(1); t < 11; t++ {
+		kmlogm = append(kmlogm, int(math.Pow(2, t-1)*float64(m)*math.Log(float64(m))))
+	}
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 15000, false, 1)
-	fmt.Printf("Results in the S2 scenario with 15000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	fmt.Printf("list: %v", kmlogm)
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 1500, false, 1)
-	fmt.Printf("Results in the S4 scenario with 1500 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	for i, val := range kmlogm {
+		originalEst, finalEst, nItermInserted, _ = runAttack("S2Preload", val, false, defaultB, uint8(i+1))
+		increase := finalEst - originalEst
+		fmt.Printf("Results in the S2 scenario with t = %d: %d, %d\n", i+1, increase, nItermInserted)
+	}
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 10000, false, 1)
-	fmt.Printf("Results in the S4 scenario with 10000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	//S4
 
-	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 15000, false, 1)
-	fmt.Printf("Results in the S4 scenario with 15000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	/**originalEst, finalEst, nItermInserted, _ = runAttack("S4", empty, false, defaultB, defaultT)
+		fmt.Printf("Results in the S4 scenario: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
+	**/
+
+	for i, val := range kmlogm {
+		originalEst, finalEst, nItermInserted, expected = runAttack("S4", val, false, defaultB, defaultT)
+		fmt.Printf("Results in the S4 scenario with t = %d: %d, %d, %d, %d\n", i+1, originalEst, finalEst, nItermInserted, expected)
+	}
 
 	/**
 
 	//Setup of RT20
 
-	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", 0, true, 1)
+	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, true, defaultB, defaultT)
 	fmt.Printf("Results in the S1 scenario, RT20 setup, with B = 1: %d, %d, %d, resets: %d\n", originalEst, finalEst, nItermInserted, nResets)
 
-	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", 0, true, uint32(m/2))
+	originalEst, finalEst, nItermInserted, nResets = runAttack("S1", empty, true, uint32(m/2), defaultT)
 	fmt.Printf("Results in the S1 scenario, RT20 setup, with B = %d: %d, %d, %d, resets: %d\n", uint32(m/2), originalEst, finalEst, nItermInserted, nResets)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 0, true, 1)
-	fmt.Printf("Results in the S2 scenario, RT20 setup: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S2", 1000, true, 1)
-	fmt.Printf("Results in the S2 scenario, RT20 setup, with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 0, true, 1)
-	fmt.Printf("Results in the S4 scenario, RT20 setup, with B = 1: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
-
-	originalEst, finalEst, nItermInserted, _ = runAttack("S4", 1000, true, 1)
-	fmt.Printf("Results in the S4 scenario, RT20 setup, with 1000 initial items: %d, %d, %d\n", originalEst, finalEst, nItermInserted)
 	**/
 
 }
 
 //runAttack is sub-function to be called in main. Does all the setup and function calls.
-func runAttack(scenario string, nInitialItems int, RT20 bool, B uint32) (int, int, int, int) {
+func runAttack(scenario string, nInitialItems int, RT20 bool, B uint32, T uint8) (int, int, int, int) {
 
 	var avgOriginalEst int
 	var avgFinalEst int
@@ -129,8 +122,10 @@ func runAttack(scenario string, nInitialItems int, RT20 bool, B uint32) (int, in
 			nItermInserted, nResets = AttackS1(hll, m, hllHash(), RT20, B)
 		case "S2":
 			nItermInserted = AttackS2(hll, m, hllHash(), RT20, B)
+		case "S2Preload":
+			nItermInserted = AttackS2Preload(hll, m, hllHash(), RT20, B, T)
 		case "S4":
-			nItermInserted = AttackS4(hll, m, hllHash(), RT20, B)
+			nItermInserted, nResets = AttackS4(hll, m, hllHash(), RT20, B)
 		default:
 			println("Not implemented")
 		}
@@ -166,6 +161,15 @@ func itob(i int) []byte {
 	b := make([]byte, binary.MaxVarintLen32)
 	binary.PutUvarint(b, uint64(i))
 	return b
+}
+
+func HarmonicMean(reg []uint8) float64 {
+	mean := float64(0)
+
+	for i := 0; i < len(reg); i++ {
+		mean += 1 / (math.Pow(2, float64(reg[i])))
+	}
+	return mean / float64(m)
 }
 
 //Generates an int of length 32-n with ci leading 1's and the rest 0's
@@ -303,12 +307,14 @@ func AttackS2Preload(hll *hyperloglog.HyperLogLog, m int, hllHash hash.Hash32, R
 }
 
 //Attack in the S4 scenario as described in the paper
-func AttackS4(hll *hyperloglog.HyperLogLog, m int, hllHash hash.Hash32, RT20 bool, B uint32) int {
+func AttackS4(hll *hyperloglog.HyperLogLog, m int, hllHash hash.Hash32, RT20 bool, B uint32) (int, int) {
 	inserted := 0
 	items := rand.Perm(maxValue)
 	if RT20 {
 		items = items[:250000]
 	}
+
+	expected := int(float64(maxValue) * (1 - HarmonicMean(hll.Reg)))
 	//First we check if we are attacking an empty sketch.
 	//If so, we will target only B buckets
 	emptyBool := hll.Count() == 0
@@ -331,5 +337,5 @@ func AttackS4(hll *hyperloglog.HyperLogLog, m int, hllHash hash.Hash32, RT20 boo
 		}
 		hllHash.Reset()
 	}
-	return inserted
+	return inserted, expected
 }

@@ -16,8 +16,36 @@ Results in the S2 scenario, RT20 setup, with 1000 initial items: 1001, 1058, 125
 Results in the S4 scenario, RT20 setup, with B = 1: 0, 1, 1003
 Results in the S4 scenario, RT20 setup, with 1000 initial items: 1003, 1003, 204127
 
+Preloaded: 
+
+Results in the S2 scenario with t = 1: 24, 524851
+Results in the S2 scenario with t = 2: 39, 786201
+Results in the S2 scenario with t = 3: 97, 917440
+Results in the S2 scenario with t = 4: 171, 983195
+Results in the S2 scenario with t = 5: 308, 1015808
+Results in the S2 scenario with t = 6: 638, 1032316
+Results in the S2 scenario with t = 7: 1129, 1040388
+Results in the S2 scenario with t = 8: 2731, 1044489
+Results in the S2 scenario with t = 9: 5946, 1046475
+Results in the S2 scenario with t = 10: 8946, 1047540
+
+S4 with (original final, inserted, expected)
+Results in the S4 scenario with t = 1: 1416, 1416, 912201, 912007
+Results in the S4 scenario with t = 2: 2825, 2825, 980257, 980048
+Results in the S4 scenario with t = 3: 5626, 5626, 1014418, 1014179
+Results in the S4 scenario with t = 4: 11364, 11364, 1031749, 1031520
+Results in the S4 scenario with t = 5: 22372, 22372, 1040113, 1039914
+Results in the S4 scenario with t = 6: 45519, 45519, 1044488, 1044313
+Results in the S4 scenario with t = 7: 91725, 91725, 1046641, 1046465
+Results in the S4 scenario with t = 8: 183520, 183520, 1047687, 1047520
+Results in the S4 scenario with t = 9: 369624, 369624, 1048220, 1048051
+Results in the S4 scenario with t = 10: 736162, 736162, 1048489, 1048312
+
 
 Redis
 
 Targeting m/2 (= 8192) buckets: Initial 0, inserted 524210, final 13185.
 With 150000 initial items: Initial 139967, inserted 524454, final 139967.
+
+
+
