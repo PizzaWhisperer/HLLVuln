@@ -242,8 +242,8 @@ Scenario S1 is distinctive in that it is the only one in which the adversary has
 
 Scenarios S2, S3 and S4 gradually increase the power of the adversary. 
 
-The S2 adversary can insert items and knows the hash function $h$ and number of buckets $m$, but is otherwise blind. Such an adversary is quite realistic. For example, both the Redis and Presto implementations of HLL use a fixed hash function and parameters that can be read off from source code.\footnote{See \url{https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L396}, \url{
-https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L466} for Redis and 
+The S2 adversary can insert items and knows the hash function $h$ and number of buckets $m$, but is otherwise blind. Such an adversary is quite realistic. For example, both the Redis and Presto implementations of HLL use a fixed hash function and parameters that can be read off from source code.\footnote{See \url{https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L397}, \url{
+https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L467} for Redis and 
 \url{https://github.com/prestodb/presto/blob/2ad67dcf000be86ebc5ff7732bbb9994c8e324a8/presto-main/src/main/java/com/facebook/presto/type/khyperloglog/KHyperLogLog.java\#L20}
 for Presto.}
 
