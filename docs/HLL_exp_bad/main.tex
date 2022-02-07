@@ -457,7 +457,8 @@ HLL was first added to Redis in release 2.8.9 in April 2014. Redis 4.0 released 
 
 Ertl~\cite{hllnew} proposed using the following cardinality estimator in place of the raw estimator in Figure~\ref{fig:hll}:
 \begin{equation}\label{eqn:ertl}
-\hat{\lambda}  = \frac{\alpha_\infty m^2}{m\sigma(C_0/m) + \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell}} \, .
+\resizebox{.9\hsize}{!}{$
+\hat{\lambda}  = \frac{\alpha_\infty m^2}{m\sigma(C_0/m) + \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell}} \, .$}
 \end{equation}
 Here, in the denominator, $C_k$ denotes the number of buckets containing value $k$ in the HLL sketch, so $C_0$ is in particular the number of empty buckets; $\sigma(\cdot)$ and $\tau(\cdot)$ are specific functions defined as:
 \[
