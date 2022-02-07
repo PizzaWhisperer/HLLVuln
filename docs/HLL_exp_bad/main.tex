@@ -244,7 +244,7 @@ Scenarios S2, S3 and S4 gradually increase the power of the adversary.
 
 The S2 adversary can insert items and knows the hash function $h$ and number of buckets $m$, but is otherwise blind. Such an adversary is quite realistic. For example, both the Redis and Presto implementations of HLL use a fixed hash function and parameters that can be read off from source code.\footnote{See \url{https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L397}, \url{
 https://github.com/redis/redis/blob/unstable/src/hyperloglog.c\#L467} for Redis and 
-\url{https://github.com/prestodb/presto/blob/2ad67dcf000be86ebc5ff7732bbb9994c8e324a8/presto-main/src/main/java/com/facebook/presto/type/khyperloglog/KHyperLogLog.java\#L20}
+\url{https://github.com/airlift/airlift/blob/master/stats/src/main/java/io/airlift/stats/cardinality/HyperLogLog.java\#L58}
 for Presto.}
 
 The S3 and S4 adversaries have stronger capabilities. The access to cardinality estimates in S3 would typically be provided via an API, while the additional access to the bucket contents in S4 may require insider capabilities. At first sight it might appear that an S3 adversary can easily infer the knowledge given to our S4 adversary in its snapshot. Indeed, an S3 adversary could try to recover the contents of each bucket in the sketch simply by analysing which inputs lead to increases in the cardinality estimate: to find the value held in a targeted bucket, the adversary would insert a sequence of items $x$ with an incrementing number of leading zeros in the $\ell$ rightmost bits of $h(x)$ whilst holding the $n$ bits determining the bucket index constant, until the cardinality estimate of the sketch increases. This assumes the adversary has sufficient flexibility in its input that the conditions on $h(x)$ can be forced. 
@@ -621,7 +621,8 @@ Similarly to the case for classic HLL, our empirical results match closely with 
 \begin{table*}[tb!]
 \begin{center}
 \caption{Attack results for HLL in Redis, averaged over 50 iterations.}\label{table:tab3}
-\begin{tabular}{| m{11em} | m{4em} | m{4.2em} |}
+%\begin{tabular}{| m{11em} | m{4em} | m{4.2em} |}
+\begin{tabular}{| c | r | r |}
     \hline
     \textbf{Scenario} &  \multicolumn{2}{c|}{S2} \\ \hline
     %\textbf{HLL initially empty?} & no & yes \\ \hline
