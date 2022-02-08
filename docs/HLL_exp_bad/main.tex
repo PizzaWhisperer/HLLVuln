@@ -164,7 +164,7 @@ For $s$ of bit-length $\ell$, let $\rho(s)$ denote the position of the leftmost 
 \textbf{if} $E \le \frac{1}{30}2^{32}$ \textbf{then}\\
     \hspace{2em} \textbf{set} $E^*:= E$; \hfill \textit{\{intermediate range --- no correction\}}\\
 \textbf{if} $E > \frac{1}{30}2^{32}$ \textbf{then}\\
-    \hspace{2em}  \textbf{set} $E^*:= -2^{32}$ln$(1 - E/2^{32})$; \hfill \textit{\{large range correction\}}\\
+    \hspace{2em}  \textbf{set} $E^*:= -2^{32}\ln(1 - E/2^{32})$; \hfill \textit{\{large range correction\}}\\
 \textbf{return} \textit{cardinality estimate $E^*$ with typical relative error} $\pm1.04/\sqrt{m}$.
 \end{flushleft}
 \end{minipage}
@@ -176,7 +176,7 @@ For $s$ of bit-length $\ell$, let $\rho(s)$ denote the position of the leftmost 
 
 HLL~\cite{hll} is based on the key observation that, for a stream of items represented as bit-strings of some fixed length, if all items have at most $k$ leading zero-bits (and one or more items actually have this many leading zero-bits), then the cardinality of the stream (i.e.\ the number of distinct values it contains) is likely to be on the order of $2^{k+1}$. To ensure a uniform distribution on the items' representations as bit-strings, the items are processed by a hash function $h$ before the leading bits are inspected.
 
-So to roughly estimate the cardinality of a stream, we need only to store a representation of $k$, the length of the largest observed string of leading zero-bits for hashes of items in the stream. This provides a very compact mechanism for estimating a stream's cardinality -- if the true cardinality is $N$, then just $\mathcal{O}(\log\log(N))$ bits of storage are needed to compute the cardinality estimate.
+So to roughly estimate the cardinality of a stream, we need only to store a representation of $k$, the length of the largest observed string of leading zero-bits for hashes of items in the stream. This provides a very compact mechanism for estimating a stream's cardinality -- if the true cardinality is $N$, then just $\mathcal{O}(\log_2\log_2(N))$ bits of storage are needed to compute the cardinality estimate.
 
 This simple approach suffers from large variance. In order to reduce the variance, HLL uses many estimators in parallel instead of one and averages the results. Each estimate is stored in its own register that we call a bucket. We refer to the collection of buckets and their contents as the HLL \emph{sketch}. To map a value $x$ to one of $m=2^n$ buckets, \cite{loglog} suggests using the first $n$ bits of $h(x)$ as a bucket index, and then computing the longest sequence of leading zero bits on the remaining $\ell$ bits of $h(x)$. The output length of $h(\cdot)$ is thus $n+\ell$. This sum is fixed to 32 in the original HLL paper~\cite{hll}. Estimates from all buckets are averaged using the harmonic mean and scaled by a constant $\alpha_m$, where $\alpha_m$ is empirically computed to correct a systematic multiplicative bias. See Figure~\ref{fig:hll}.
 
