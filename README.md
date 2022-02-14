@@ -1,8 +1,8 @@
 # HLLVuln
 
-doc/ folder contains paper's sources
+latex/ folder contains paper's sources
 
-attacks/ folder contains code and experiments
+code/ folder contains code and experiments
 
 ## Attacks
 

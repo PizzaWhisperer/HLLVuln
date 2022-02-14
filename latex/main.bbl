@@ -1,0 +1,195 @@
+\begin{thebibliography}{10}
+
+\bibitem{hll}
+P.~Flajolet, {\'E}.~Fusy, O.~Gandouet, and F.~Meunier, ``{HyperLogLog}: the
+  analysis of a near-optimal cardinality estimation algorithm,'' in {\em
+  Proceedings of the International Conference on Analysis of Algorithms
+  (AOFA)}, pp.~127--146, 2007.
+
+\bibitem{fbhll}
+M.~Honarkhah and A.~Talebzadeh, ``{HyperLogLog} in {Presto}: A significantly
+  faster way to handle cardinality estimation.'' Online:
+  \url{https://engineering.fb.com/data-infrastructure/hyperloglog/}, 2018.
+\newblock Accessed: 2021-04-30.
+
+\bibitem{hllpractice}
+S.~Heule, M.~Nunkesser, and A.~Hall, ``{HyperLogLog} in practice: algorithmic
+  engineering of a state of the art cardinality estimation algorithm,'' in {\em
+  Proceedings of the 16th International Conference on Extending Database
+  Technology}, pp.~683--692, 2013.
+
+\bibitem{HallBBGN12}
+A.~Hall, O.~Bachmann, R.~B{\"{u}}ssow, S.~Ganceanu, and M.~Nunkesser,
+  ``Processing a trillion cells per mouse click,'' {\em Proc. {VLDB} Endow.},
+  vol.~5, no.~11, pp.~1436--1446, 2012.
+
+\bibitem{flexswitch}
+N.~K. Sharma, A.~Kaufmann, T.~Anderson, C.~Kim, A.~Krishnamurthy, J.~Nelson,
+  and S.~Peter, ``{Evaluating the Power of Flexible Packet Processing for
+  Network Resource Allocation},'' in {\em Proceedings of the 14th USENIX
+  Conference on Networked Systems Design and Implementation (NSDI)},
+  pp.~67--82, 2017.
+
+\bibitem{portscanhll}
+Y.~Chabchoub, R.~Chiky, and B.~Dogan, ``How can sliding {HyperLogLog} and
+  {EWMA} detect port scan attacks in {IP} traffic?,'' {\em EURASIP Journal on
+  Information Security}, pp.~1--11, 2014.
+
+\bibitem{slidinghll}
+Y.~Chabchoub and G.~Hebrail, ``{Sliding {HyperLogLog}: estimating cardinality
+  in a data stream over a sliding window}.,'' in {\em Proceedings of the 2010
+  IEEE International Conference on Data Mining Workshops}, pp.~1297--1303,
+  2010.
+
+\bibitem{hllvuln}
+P.~Reviriego and D.~Ting, ``Security of hyperloglog {(HLL)} cardinality
+  estimation: Vulnerabilities and protection,'' {\em {IEEE} Commun. Lett.},
+  vol.~24, no.~5, pp.~976--980, 2020.
+
+\bibitem{hllnew}
+O.~Ertl, ``New cardinality estimation methods for {HyperLogLog} sketches,''
+  {\em CoRR}, vol.~abs/1706.07290, 2017.
+
+\bibitem{cardestprivacy}
+D.~Desfontaines, A.~Lochbihler, and D.~Basin, ``{Cardinality Estimators do not
+  Preserve Privacy},'' in {\em Proceedings on Privacy Enhancing Technologies},
+  pp.~26--46, 2019.
+
+\bibitem{CCS:ClaPatShrPS19}
+D.~Clayton, C.~Patton, and T.~Shrimpton, ``Probabilistic data structures in
+  adversarial environments,'' in {\em Proceedings of the 2019 {ACM} {SIGSAC}
+  Conference on Computer and Communications Security, {CCS} 2019, London, UK,
+  November 11-15, 2019} (L.~Cavallaro, J.~Kinder, X.~Wang, and J.~Katz, eds.),
+  pp.~1317--1334, {ACM}, 2019.
+
+\bibitem{NaorY15}
+M.~Naor and E.~Yogev, ``Bloom filters in adversarial environments,'' in {\em
+  Advances in Cryptology - {CRYPTO} 2015 - 35th Annual Cryptology Conference,
+  Santa Barbara, CA, USA, August 16-20, 2015, Proceedings, Part {II}}
+  (R.~Gennaro and M.~Robshaw, eds.), vol.~9216 of {\em Lecture Notes in
+  Computer Science}, pp.~565--584, Springer, 2015.
+
+\bibitem{GerbetKL15}
+T.~Gerbet, A.~Kumar, and C.~Lauradoux, ``The power of evil choices in {B}loom
+  filters,'' in {\em 45th Annual {IEEE/IFIP} International Conference on
+  Dependable Systems and Networks, {DSN} 2015, Rio de Janeiro, Brazil, June
+  22-25, 2015}, pp.~101--112, {IEEE} Computer Society, 2015.
+
+\bibitem{LiptonN93}
+R.~J. Lipton and J.~F. Naughton, ``Clocked adversaries for hashing,'' {\em
+  Algorithmica}, vol.~9, no.~3, pp.~239--252, 1993.
+
+\bibitem{CrosbyW03}
+S.~A. Crosby and D.~S. Wallach, ``Denial of service via algorithmic complexity
+  attacks,'' in {\em Proceedings of the 12th {USENIX} Security Symposium,
+  Washington, D.C., USA, August 4-8, 2003}, {USENIX} Association, 2003.
+
+\bibitem{Ben-EliezerJWY20}
+O.~Ben{-}Eliezer, R.~Jayaram, D.~P. Woodruff, and E.~Yogev, ``A framework for
+  adversarially robust streaming algorithms,'' in {\em Proceedings of the 39th
+  {ACM} {SIGMOD-SIGACT-SIGAI} Symposium on Principles of Database Systems,
+  {PODS} 2020, Portland, OR, USA, June 14-19, 2020} (D.~Suciu, Y.~Tao, and
+  Z.~Wei, eds.), pp.~63--80, {ACM}, 2020.
+
+\bibitem{DBLP:journals/corr/abs-2011-07471}
+D.~P. Woodruff and S.~Zhou, ``Tight bounds for adversarially robust streams and
+  sliding windows via difference estimators,'' {\em CoRR}, vol.~abs/2011.07471,
+  2020.
+
+\bibitem{HassidimKMMS20}
+A.~Hassidim, H.~Kaplan, Y.~Mansour, Y.~Matias, and U.~Stemmer, ``Adversarially
+  robust streaming algorithms via differential privacy,'' in {\em Advances in
+  Neural Information Processing Systems 33: Annual Conference on Neural
+  Information Processing Systems 2020, NeurIPS 2020, December 6-12, 2020,
+  virtual} (H.~Larochelle, M.~Ranzato, R.~Hadsell, M.~Balcan, and H.~Lin,
+  eds.), 2020.
+
+\bibitem{KaplanMNS21}
+H.~Kaplan, Y.~Mansour, K.~Nissim, and U.~Stemmer, ``Separating adaptive
+  streaming from oblivious streaming using the bounded storage model,'' in {\em
+  Advances in Cryptology - {CRYPTO} 2021 - 41st Annual International Cryptology
+  Conference, {CRYPTO} 2021, Virtual Event, August 16-20, 2021, Proceedings,
+  Part {III}} (T.~Malkin and C.~Peikert, eds.), vol.~12827 of {\em Lecture
+  Notes in Computer Science}, pp.~94--121, Springer, 2021.
+
+\bibitem{loglog}
+M.~Durand and P.~Flajolet, ``{{LogLog} Counting of Large Cardinalities},'' {\em
+  Annual European Symposium on Algorithms (ESA)}, pp.~605--617, 2003.
+
+\bibitem{hitcounting}
+K.-Y. Whang, B.~Vander-Zanden, and H.~Taylor, ``A linear-time probabilistic
+  counting algorithm for database applications,'' {\em ACM Transactions on
+  Database Systems}, pp.~208--229, 1990.
+
+\bibitem{MR95}
+R.~Motwani and P.~Raghavan, {\em Randomized algorithms}.
+\newblock Cambridge University Press, 1995.
+
+\bibitem{clahll}
+``Hyperloglog by clarkduvall.'' Online:
+  \url{https://github.com/clarkduvall/hyperloglog}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{datasketch}
+``Hyperloglog by ekzhu.'' Online:
+  \url{https://github.com/ekzhu/datasketch/blob/master/datasketch/hyperloglog.py}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{redis}
+``Hyperloglog by antirez.'' Online:
+  \url{https://github.com/antirez/redis/blob/unstable/src/hyperloglog.c}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{bigquery}
+``Google's bigquery.'' Online:
+  \url{https://github.com/google/zetasketch/blob/master/java/com/google/zetasketch/HyperLogLogPlusPlus.java}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{airlift}
+``Facebook airlift.'' Online:
+  \url{https://github.com/airlift/airlift/blob/master/stats/src/main/java/io/airlift/stats/cardinality/HyperLogLog.java}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{spahll}
+``Apache spark.'' Online:
+  \url{https://github.com/swoop-inc/spark-alchemy/tree/master/alchemy/src/main/scala/com/swoop/alchemy/spark/expressions/hll}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{druhll}
+``Apache druid.'' Online:
+  \url{https://github.com/apache/druid/blob/master/hll/src/main/java/org/apache/druid/hll}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{murmur3code}
+``Murmur3 by spaolacci.'' Online: \url{https://github.com/spaolacci/murmur3}.
+\newblock Accessed: 2020-04-28.
+
+\bibitem{BonehShoup}
+D.~Boneh and V.~Shoup, {\em A Graduate Course in Applied Cryptography}.
+
+\bibitem{AumassonB12}
+J.~Aumasson and D.~J. Bernstein, ``Sip{H}ash: {A} fast short-input {PRF},'' in
+  {\em Progress in Cryptology - {INDOCRYPT} 2012, 13th International Conference
+  on Cryptology in India, Kolkata, India, December 9-12, 2012. Proceedings}
+  (S.~D. Galbraith and M.~Nandi, eds.), vol.~7668 of {\em Lecture Notes in
+  Computer Science}, pp.~489--508, Springer, 2012.
+
+\bibitem{DobraunigMS14}
+C.~Dobraunig, F.~Mendel, and M.~Schl{\"{a}}ffer, ``Differential cryptanalysis
+  of {SipHash},'' in {\em Selected Areas in Cryptography - {SAC} 2014 - 21st
+  International Conference, Montreal, QC, Canada, August 14-15, 2014, Revised
+  Selected Papers} (A.~Joux and A.~M. Youssef, eds.), vol.~8781 of {\em Lecture
+  Notes in Computer Science}, pp.~165--182, Springer, 2014.
+
+\bibitem{XinLSL19}
+W.~Xin, Y.~Liu, B.~Sun, and C.~Li, ``Improved cryptanalysis on siphash,'' in
+  {\em Cryptology and Network Security - 18th International Conference, {CANS}
+  2019, Fuzhou, China, October 25-27, 2019, Proceedings} (Y.~Mu, R.~H. Deng,
+  and X.~Huang, eds.), vol.~11829 of {\em Lecture Notes in Computer Science},
+  pp.~61--79, Springer, 2019.
+
+\bibitem{Berlekamp}
+E.~R. Berlekamp, ``Factoring polynomials over finite fields,'' {\em Bell System
+  Technical Journal}, vol.~46, pp.~1853--1859, 1967.
+
+\end{thebibliography}
