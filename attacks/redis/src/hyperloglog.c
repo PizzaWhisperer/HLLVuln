@@ -204,9 +204,14 @@ struct hllhdr {
 #define HLL_SPARSE 1 /* Sparse encoding. */
 #define HLL_RAW 255 /* Only used internally, never exposed. */
 #define HLL_MAX_ENCODING 1
-#define RAND_ITEMS 150000 /*0*/
-#define B 1<<(HLL_P-1)
+
 #define MAX_VALUE (1<<20)-1
+
+#define EMPTY true
+#define EPSILON 0.25
+
+int const B = (1-EPSILON)*HLL_REGISTERS;
+int const T =1; /* in {1, 2, 3} */
 
 
 static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected";
@@ -1226,11 +1231,7 @@ void pfattackCommand(client *c) {
     robj *o = lookupKeyWrite(c->db,c->argv[1]);
     struct hllhdr *hdr;
     int updated = 0;
-
     if (o == NULL) {
-        /* Create the key with a string value of the exact length to
-         * hold our HLL data structure. sdsnewlen() when NULL is passed
-         * is guaranteed to return bytes initialized to zero. */
         o = createHLLObject();
         dbAdd(c->db,c->argv[1],o);
         updated++;
@@ -1239,50 +1240,49 @@ void pfattackCommand(client *c) {
         o = dbUnshareStringValue(c->db,c->argv[1],o);
     }
 
-    /* Insert RAND_ITEMS honest initial items */
-    srand(time(NULL));
+    /* Insert number_items honest initial items */
+    if (!EMPTY) {
+      srand(time(NULL));
+      // 2^{t-1}*m*ln(m)
+      int number_items = (1<<(T-1))*158991;
+      for (int j = 0; j < number_items; j++) {
+        int r = rand() % MAX_VALUE;
+        hllAdd(o, (unsigned char*)&r, sizeof(r));
+      }
 
-    for (int j = 0; j < RAND_ITEMS; j++) {
-      int r = rand() % MAX_VALUE;
-      hllAdd(o, (unsigned char*)&r, sizeof(r));
+      /* Prints the initial cardinality (code from PFCOUNT) */
+
+      hdr = o->ptr;
+      uint64_t card;
+      if (HLL_VALID_CACHE(hdr)) {
+          card = (uint64_t)hdr->card[0];
+          card |= (uint64_t)hdr->card[1] << 8;
+          card |= (uint64_t)hdr->card[2] << 16;
+          card |= (uint64_t)hdr->card[3] << 24;
+          card |= (uint64_t)hdr->card[4] << 32;
+          card |= (uint64_t)hdr->card[5] << 40;
+          card |= (uint64_t)hdr->card[6] << 48;
+          card |= (uint64_t)hdr->card[7] << 56;
+      } else {
+          int invalid = 0;
+          card = hllCount(hdr,&invalid);
+          if (invalid) {
+              addReplyError(c,invalid_hll_err);
+              return;
+          }
+          hdr->card[0] = card & 0xff;
+          hdr->card[1] = (card >> 8) & 0xff;
+          hdr->card[2] = (card >> 16) & 0xff;
+          hdr->card[3] = (card >> 24) & 0xff;
+          hdr->card[4] = (card >> 32) & 0xff;
+          hdr->card[5] = (card >> 40) & 0xff;
+          hdr->card[6] = (card >> 48) & 0xff;
+          hdr->card[7] = (card >> 56) & 0xff;
+          signalModifiedKey(c,c->db,c->argv[1]);
+          server.dirty++;
+      }
+      printf("Initial cardinality %llu\n", card);
     }
-    hdr = o->ptr;
-    uint64_t card;
-
-    if (HLL_VALID_CACHE(hdr)) {
-        /* Just return the cached value. */
-        card = (uint64_t)hdr->card[0];
-        card |= (uint64_t)hdr->card[1] << 8;
-        card |= (uint64_t)hdr->card[2] << 16;
-        card |= (uint64_t)hdr->card[3] << 24;
-        card |= (uint64_t)hdr->card[4] << 32;
-        card |= (uint64_t)hdr->card[5] << 40;
-        card |= (uint64_t)hdr->card[6] << 48;
-        card |= (uint64_t)hdr->card[7] << 56;
-    } else {
-        int invalid = 0;
-        /* Recompute it and update the cached value. */
-        card = hllCount(hdr,&invalid);
-        if (invalid) {
-            addReplyError(c,invalid_hll_err);
-            return;
-        }
-        hdr->card[0] = card & 0xff;
-        hdr->card[1] = (card >> 8) & 0xff;
-        hdr->card[2] = (card >> 16) & 0xff;
-        hdr->card[3] = (card >> 24) & 0xff;
-        hdr->card[4] = (card >> 32) & 0xff;
-        hdr->card[5] = (card >> 40) & 0xff;
-        hdr->card[6] = (card >> 48) & 0xff;
-        hdr->card[7] = (card >> 56) & 0xff;
-        /* This is considered a read-only command even if the cached value
-         * may be modified and given that the HLL is a Redis string
-         * we need to propagate the change. */
-        signalModifiedKey(c,c->db,c->argv[1]);
-        server.dirty++;
-    }
-
-    printf("Initial cardinality %llu\n", card);
 
     /* Attack: check the hash, and insert if satisfy condition. */
     long inserted = 0;
@@ -1291,12 +1291,11 @@ void pfattackCommand(client *c) {
       //Hash and test
       long index;
       uint8_t count = hllPatLen((unsigned char*)&i,sizeof(i),&index);
-
       //Add if condition on leading zeros is satisfied or if the bucket is among the targeted ones
-        if (((card > 0) && (count == 1)) || ((card == 0) && (index < B))){
+      if ((!EMPTY && (count <= T)) || ((EMPTY && (index < B)) && (count != HLL_REGISTER_MAX))) {
           hllAdd(o, (unsigned char*)&i,sizeof(i));
           inserted++;
-        }
+      }
     }
 
     hdr = o->ptr;
