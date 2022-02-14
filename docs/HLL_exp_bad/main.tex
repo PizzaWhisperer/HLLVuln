@@ -397,9 +397,9 @@ Now we turn to the case where the HLL sketch under attack is not initially empty
 
 \subsubsection{Initially Non-empty HLL Sketch, Scenario S2}\label{sec:nonemptyHLLS2}
 
-We assume that at least $2^{t-1} m\ln m$ items have already been honestly inserted into the target HLL, for some integer $t$ with $1 \leq t \leq \ell$ which will be a parameter of our attack. We assume the S2 adversary somehow knows that this condition holds (e.g.\ through knowledge of when the HLL was initialised and the average rate at which items are inserted into it). If it were to be the case that our assumption does not hold and the adversary cannot estimate the number of items in the sketch, they can use a downward estimate such as $t=1$. As this lower-bound on $t$ is highly likely to happen, the adversary is taking only very small risk. Notice that an S3 adversary can use its ability to get cardinality estimates to obtain this knowledge; this is one situation where an S3 adversary can make good use of the extra information available to it as compared to an S2 adversary. In S4, the adversary can use its access to a snapshot to mount a more powerful attack; see Section~\ref{sec:nonemptyHLLS4}. 
+We assume that at least $2^{t-1} m\ln m$ items have already been honestly inserted into the target HLL, for some integer $t$ with $1 \leq t \leq \ell$ which will be a parameter of our attack. We assume the S2 adversary somehow knows that this condition holds (e.g.\ through knowledge of when the HLL was initialised and the average rate at which items are inserted into it). An S2 adversary who cannot estimate the number of items in the sketch can always conservatively set $t=1$ and minimise the risk that the required condition does not hold. Notice also that an S3 adversary can use its ability to get cardinality estimates to obtain an estimate for $t$; this is one situation where an S3 adversary can make good use of the extra information available to it as compared to an S2 adversary. In S4, the adversary can use its access to a snapshot to mount a more powerful attack; see Section~\ref{sec:nonemptyHLLS4}. 
 
-Under the condition that at least $2^{t-1} m\ln m$ items have already been honestly inserted, it is highly likely that every one of the $m=2^n$ buckets has counter value $M[j]$ with $M[j] \ge t$. This follows from the standard analysis of the coupon collector problem~\cite[Section 3.6]{MR95} under our usual assumption that $h$ behaves as a random function. To see this, note that when an item $x$ is inserted into a specific bucket $j$, the condition $M[j] \ge t$ holds with probability $q:=1/2^{t-1}$; so with a total of $N$ attempted insertions, we expect $Nq$ usable insertions, with a sharp concentration around this number. We need about $m\ln m$ usable insertions to occur to ensure we get one in every bucket; setting $Nq = m\ln m$ completes the argument. 
+Under the condition that at least $2^{t-1} m\ln m$ items have already been honestly inserted, it is highly likely that every one of the $m=2^n$ buckets has counter value $M[j]$ with $M[j] \ge t$. This follows from the standard analysis of the coupon collector problem~\cite[Section 3.6]{MR95} under our usual assumption that $h$ behaves as a random function. To see this, note that when an item $x$ is inserted into a specific bucket $j$, the condition $M[j] \ge t$ holds with probability $q:=1/2^{t-1}$; so with a total of $N$ attempted insertions, we expect $Nq$ usable insertions, with a sharp concentration around the expected number. We need about $m\ln m$ usable insertions to occur to ensure we get one in every bucket; setting $Nq = m\ln m$ completes the argument. 
 
 With $2^{t-1}m \ln m$ honest insertions, it is also highly likely that the small range correction (Hit Counting algorithm) will not be used, and the target HLL's cardinality estimate will be computed using the raw estimate.
 %\[
@@ -581,18 +581,18 @@ We can also compare with the attack presented in~\cite[Section 5.1]{hllvuln}. In
     \centering
     \begin{minipage}{0.45\textwidth}
         \centering
-        \caption{Attack results as function of t in scenario S2 with initially non-empty HLL sketch.}\label{fig:graphS2}
+        \caption{Attack results as function of $t$ in scenario S2 with initially non-empty HLL sketch.}\label{fig:graphS2}
         \includegraphics[width=0.9\textwidth]{figures/graph_S2.pdf}
     \end{minipage}\hfill
     \begin{minipage}{0.45\textwidth}
         \centering
-        \caption{Attack results as function of t in scenario S4 with initially non-empty HLL sketch.}\label{fig:graphS4}
+        \caption{Attack results as function of $t$ in scenario S4 with initially non-empty HLL sketch.}\label{fig:graphS4}
         \includegraphics[width=0.9\textwidth]{figures/graph_S4.pdf} % second figure itself
      \end{minipage}
      
      \begin{minipage}{0.45\textwidth}
         \centering
-        \caption{Attack results as function of t for HLL in Redis (scenario S2) with initially non-empty HLL sketch.}\label{fig:graphRedis}
+        \caption{Attack results as function of $t$ for HLL in Redis (scenario S2) with initially non-empty HLL sketch.}\label{fig:graphRedis}
         \includegraphics[width=0.9\textwidth]{figures/graph_redis.pdf} % second figure itself
      \end{minipage}
 \end{figure*}
@@ -623,8 +623,7 @@ Furthermore, the number of buckets is constant and set to 16,384. Knowledge of t
 Since a classic Redis application separates the server holding the sketch from the client interacting with the sketch, we consider that attack scenarios S3 or S4, while possible, are not typical for Redis. 
 Thus, we only consider scenario S2 for Redis.
 We set attack parameter $\epsilon$ to $\frac{1}{2}$ and then $\frac{1}{4}$ in the attack on an initially empty HLL sketch. We recall that this will lead to the number of empty buckets $C_0$ to be equal to $\frac{m}{2} (=8,192)$ and $\frac{m}{4} (=4,096)$ respectively.
-The results are averaged over 50 iterations and reported in Table~\ref{table:tab3} and Figure~\ref{fig:graphRedis}.
-Similarly to the case for classic HLL, our empirical results match closely with our theoretical analysis.
+The results are averaged over 50 iterations and reported in Table~\ref{table:tab3}. Meanwhile, Figure~\ref{fig:graphRedis} shows our results for an initially non-empty sketch as a function of $t$, where $2^{t-1}m\ln m$ items are honestly inserted into the sketch. Similarly to the case for classic HLL, our empirical results in  Table~\ref{table:tab3} and Figure~\ref{fig:graphRedis} match closely with our theoretical analyses.
 
 \begin{table*}[tb!]
 \begin{center}
