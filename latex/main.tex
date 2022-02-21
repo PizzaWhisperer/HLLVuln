@@ -1,8 +1,8 @@
 
 \newif\ifIEEEversion % turn on IEEE style 
-\IEEEversiontrue
+\IEEEversionfalse
 \newif\ifanon % needed for acks, suppression of authors, etc
-\anontrue
+\anonfalse
 
 
 \ifIEEEversion
@@ -821,7 +821,11 @@ The authors thank Dennis Hofheinz and Anupama Unnikrishnan for useful discussion
 \bibliographystyle{ieeetr}
 \bibliography{./ref.bib}
 
+\ifIEEEversion
 \appendices
+\else
+\appendix
+\fi
 
 \section{Further analysis of Flexswitches}\label{sec:flexswitch}
 
