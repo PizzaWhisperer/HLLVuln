@@ -457,10 +457,17 @@ We present an analysis of the HLL implementation used in Redis, since Redis is a
 HLL was first added to Redis in release 2.8.9 in April 2014. Redis 4.0 released in April 2017 introduced HLL Beta, which improves on the raw HLL cardinality estimator by using polynomial interpolation to reduce systematic errors. Redis 5.0 released in October 2018 replaces this with a new cardinality estimator based closely on the work of Ertl~\cite{hllnew}. This method is still used in the current release (Redis 6.2.5) and so is the object of our study here.\footnote{For details of Redis releases, see \url{https://github.com/redis/redis/blob/6.2/00-RELEASENOTES} and other files obtained by replacing ``6.2'' in this URL with the desired version number.}
 
 Ertl~\cite{hllnew} proposed using the following cardinality estimator in place of the raw estimator in Figure~\ref{fig:hll}:
+\ifIEEEversion
 \begin{equation}\label{eqn:ertl}
 \resizebox{.9\hsize}{!}{$
 \hat{\lambda}  = \frac{\alpha_\infty m^2}{m\sigma(C_0/m) + \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell}} \, .$}
 \end{equation}
+\else
+\begin{equation}\label{eqn:ertl}
+\hat{\lambda}  = \frac{\alpha_\infty m^2}{m\sigma(C_0/m) + \sum_{k=1}^{\ell}C_k 2^{-k} + m \tau(1-C_{\ell+1}/m)2^{-\ell}} \, .
+\end{equation}
+\fi
+
 Here, in the denominator, $C_k$ denotes the number of buckets containing value $k$ in the HLL sketch, so $C_0$ is in particular the number of empty buckets; $\sigma(\cdot)$ and $\tau(\cdot)$ are specific functions defined as:
 \[
 \sigma(x) :=  x + \sum_{k=1}^{\infty} x^{2^k} 2^{k-1}
