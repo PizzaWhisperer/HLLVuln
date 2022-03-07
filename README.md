@@ -1,4 +1,4 @@
-# Source code for the paper "HyperLogLog: exponentially bad"
+#  Source code of the attacks presented in the paper "HyperLogLog: exponentially bad"
 
 Our attacks demonstrates how an adversary can perform a cardinality manipulation attack on the HyperLogLog sketch, when having access to various low level details of the implementation.
 
