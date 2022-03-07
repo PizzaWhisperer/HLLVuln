@@ -4,10 +4,6 @@ Our attacks demonstrates how an adversary can perform a cardinality manipulation
 
 All attacks discussed in our paper are implemented and tested in this repository. 
 
-The `paper/` folder contains our paper's source files and other documents.
-
-The `script/` folder contains our attacks' code and related experiments. 
-
 ## Attacks on Classic HLL
 
 We attack ([clarkduvall's](https://github.com/clarkduvall/hyperloglog)) popular implementation of classic HLL.
