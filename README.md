@@ -8,7 +8,7 @@ All attacks discussed in our paper are implemented and tested in this repository
 
 We attack [clarkduvall's](https://github.com/clarkduvall/hyperloglog) popular implementation of classic HLL.
 
-Please make sure fist that Go is properly installed on your machine (see [the official documentation](https://go.dev/doc/install) if needed).
+As the implementation is in Go, make sure first that Go is properly installed on your machine (see [the official documentation](https://go.dev/doc/install) if needed).
 
 The, running `cd classic_hll/ && go run attack_hll.go`
 
